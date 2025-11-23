@@ -22,7 +22,7 @@ $offset = ($page - 1) * $limit;
 $query = "
     SELECT
         ip.id AS intervention_id,
-        STRFTIME('%d/%m/%Y', ip.date) AS date,
+        STRFTIME('%d/%m/%Y %H:%M', ip.date) AS date,
         ip.annee_culturale,
         p.id AS parcelle_id,
         p.nom AS parcelle_nom,
@@ -200,7 +200,6 @@ $total_pages = ceil($total_interventions / $limit);
                     <tr>
                         <th>Date</th>
                         <th>Produit</th>
-                        <th>Unité</th>
                         <th>AMM</th>
                         <th>Volume total</th>
                         <th>Volume par ha</th>
@@ -212,10 +211,9 @@ $total_pages = ceil($total_interventions / $limit);
                         <tr>
                             <td><?php if ($detail['date'] !== $last_date) { echo htmlspecialchars($detail['date']); $last_date = $detail['date'];}  ?></td>
                             <td><?= htmlspecialchars_decode($detail['produit_nom']) ?></td>
-                            <td><?= htmlspecialchars($detail['produit_unite']) ?></td>
                             <td><?= htmlspecialchars($detail['produit_amm']) ?></td>
-                            <td><?= htmlspecialchars($detail['volume_total']) ?></td>
-                            <td><?= htmlspecialchars($detail['volume_par_ha']) ?></td>
+                            <td><?= htmlspecialchars($detail['volume_total']) ?> <?= htmlspecialchars($detail['produit_unite']) ?></td>
+                            <td><?= htmlspecialchars($detail['volume_par_ha']) ?> <?= htmlspecialchars($detail['produit_unite']) ?></td>
                             <td><?= htmlspecialchars_decode($detail['cible']) ?></td>
                         </tr>
                     <?php endforeach; ?>

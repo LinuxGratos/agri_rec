@@ -19,13 +19,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             case 'create':
                 $parcelle_id = intval($_POST['parcelle_id']);
                 $date = clean_input($_POST['date']);
+		$heure = clean_input($_POST['heure']);
                 $annee_culturale = intval($_POST['annee_culturale']);
+		$datetime = $date . ' ' . $heure;
 
                 $db->exec('BEGIN TRANSACTION');
 
                 $stmt = $db->prepare('INSERT INTO interventions_phytosanitaires (parcelle_id, date, annee_culturale) VALUES (:parcelle_id, :date, :annee_culturale)');
                 $stmt->bindValue(':parcelle_id', $parcelle_id, SQLITE3_INTEGER);
-                $stmt->bindValue(':date', $date, SQLITE3_TEXT);
+                $stmt->bindValue(':date', $datetime, SQLITE3_TEXT);
                 $stmt->bindValue(':annee_culturale', $annee_culturale, SQLITE3_INTEGER);
                 $stmt->execute();
 
@@ -121,6 +123,7 @@ $interventions = $db->query('SELECT ip.*, p.nom as parcelle_nom, p.surface, p.il
         </select><br/>
         <br/>
         Date d'intervention : <input type="date" name="date" required><br/>
+	Heure d'intervention : <input type="time" name="heure" required><br/>
         <br/>
         Année culturale : <input type="number" min="<?php echo date("Y")-1; ?>" max="<?php echo date("Y")+3; ?>" step="1" value="<?php echo date("Y"); ?>" name="annee_culturale" placeholder="Année culturale" required>
         <br/>
