@@ -20,15 +20,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $parcelle_id = intval($_POST['parcelle_id']);
                 $date = clean_input($_POST['date']);
                 $heure = clean_input($_POST['heure']);
+                $stade = clean_input($_POST['stade']);
                 $annee_culturale = intval($_POST['annee_culturale']);
                 $datetime = $date . ' ' . $heure;
 
                 $db->exec('BEGIN TRANSACTION');
 
-                $stmt = $db->prepare('INSERT INTO interventions_phytosanitaires (parcelle_id, date, annee_culturale) VALUES (:parcelle_id, :date, :annee_culturale)');
+                $stmt = $db->prepare('INSERT INTO interventions_phytosanitaires (parcelle_id, date, annee_culturale, stade) VALUES (:parcelle_id, :date, :annee_culturale, :stade)');
                 $stmt->bindValue(':parcelle_id', $parcelle_id, SQLITE3_INTEGER);
                 $stmt->bindValue(':date', $datetime, SQLITE3_TEXT);
                 $stmt->bindValue(':annee_culturale', $annee_culturale, SQLITE3_INTEGER);
+                $stmt->bindValue(':stade', $stade, SQLITE3_TEXT);
                 $stmt->execute();
 
                 $intervention_id = $db->lastInsertRowID();
@@ -122,12 +124,13 @@ $interventions = $db->query('SELECT ip.*, p.nom as parcelle_nom, p.surface, p.il
             <?php endwhile; ?>
         </select><br/>
         <br/>
+        Année culturale : <input type="number" min="<?php echo date("Y")-1; ?>" max="<?php echo date("Y")+3; ?>" step="1" value="<?php echo date("Y"); ?>" name="annee_culturale" placeholder="Année culturale" required> </br>
+        </br>
         Date d'intervention : <input type="date" name="date" required><br/>
         Heure d'intervention : <input type="time" name="heure" required><br/>
         <br/>
-        Année culturale : <input type="number" min="<?php echo date("Y")-1; ?>" max="<?php echo date("Y")+3; ?>" step="1" value="<?php echo date("Y"); ?>" name="annee_culturale" placeholder="Année culturale" required>
-        <br/>
-        <br/>
+        Stade de la culture : <input type="text" name="stade" placeholder="Stade" required> </br>
+        </br>
         <div id="produits-container">
             <div>
                 Produit phytosanitaire : <select name="produit_id[]" required>
@@ -152,19 +155,21 @@ $interventions = $db->query('SELECT ip.*, p.nom as parcelle_nom, p.surface, p.il
     <h3>Liste des interventions</h3>
     <table>
         <tr>
+            <th>Année culturale</th>
             <th>Date</th>
             <th>Parcelle</th>
             <th>Ilot</th>
-            <th>Année culturale</th>
+            <th>Stade</th>
             <th>Produits utilisés</th>
             <th>Actions</th>
         </tr>
         <?php while ($intervention = $interventions->fetchArray(SQLITE3_ASSOC)): ?>
         <tr>
+            <td><?php echo htmlspecialchars($intervention['annee_culturale']); ?></td>
             <td><?php echo htmlspecialchars($intervention['date']); ?></td>
             <td><?php echo htmlspecialchars_decode($intervention['parcelle_nom']); ?></td>
             <td><?php echo htmlspecialchars($intervention['parcelle_ilot']); ?></td>
-            <td><?php echo htmlspecialchars($intervention['annee_culturale']); ?></td>
+            <td><?php echo htmlspecialchars_decode($intervention['stade']); ?></td>
             <td>
                 <?php
                 $details = $db->query('SELECT dip.*, pp.nom as produit_nom,  pp.unite_emballage as produit_unite

@@ -24,6 +24,7 @@ $query = "
         ip.id AS intervention_id,
         STRFTIME('%d/%m/%Y %H:%M', ip.date) AS date,
         ip.annee_culturale,
+        ip.stade,
         p.id AS parcelle_id,
         p.nom AS parcelle_nom,
         p.ilot AS parcelle_ilot,
@@ -101,6 +102,7 @@ try {
 
         $interventions[$key]['interventions'][] = [
             'date' => $row['date'],
+            'stade' => $row['stade'],
             'produit_nom' => $row['produit_nom'],
             'produit_unite' => $row['produit_unite'],
             'produit_amm' => $row['produit_amm'],
@@ -190,7 +192,7 @@ $total_pages = ceil($total_interventions / $limit);
                 <thead>
                     <tr>
                         <th colspan="7">
-                            Année culturale: <?= htmlspecialchars($intervention['annee_culturale']) ?> | 
+                            Année culturale: <?= htmlspecialchars($intervention['annee_culturale']) ?> |
                             Parcelle : <?= htmlspecialchars_decode($intervention['parcelle_nom']) ?> <br/>
                             Ilot : <?= htmlspecialchars($intervention['parcelle_ilot']) ?> <br/>
                             Surface : <?= htmlspecialchars($intervention['surface']) ?> ha |
@@ -199,17 +201,19 @@ $total_pages = ceil($total_interventions / $limit);
                     </tr>
                     <tr>
                         <th>Date</th>
+                        <th>Stade de la culture</th>
                         <th>Produit</th>
                         <th>AMM</th>
                         <th>Volume total</th>
                         <th>Volume par ha</th>
-                        <th>Cible</th>
+                        <th>Cible visée</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php foreach ($intervention['interventions'] as $detail) : ?>
                         <tr>
                             <td><?php if ($detail['date'] !== $last_date) { echo htmlspecialchars($detail['date']); $last_date = $detail['date'];}  ?></td>
+                            <td><?php if ($detail['stade'] !== $last_stade) { echo htmlspecialchars_decode($detail['stade']); $last_stade = $detail['stade'];}  ?></td>
                             <td><?= htmlspecialchars_decode($detail['produit_nom']) ?></td>
                             <td><?= htmlspecialchars($detail['produit_amm']) ?></td>
                             <td><?= htmlspecialchars($detail['volume_total']) ?> <?= htmlspecialchars($detail['produit_unite']) ?></td>
