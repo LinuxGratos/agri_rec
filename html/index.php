@@ -1,16 +1,16 @@
 <?php
 session_start();
-require_once 'includes/config.php';
+require_once "includes/config.php";
 
 // Vérifier si le fichier de base de données existe
 if (!file_exists(DB_PATH)) {
-    header('Location: install.php');
+    header("Location: install.php");
     exit();
 }
 
 // Vérifier si l'utilisateur est authentifié
-if (!isset($_SESSION['user_id'])) {
-    header('Location: login.php');
+if (!isset($_SESSION["user_id"])) {
+    header("Location: login.php");
     exit();
 }
 
@@ -19,21 +19,73 @@ if (!isset($_SESSION['user_id'])) {
 
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
-    <title>Tableau de bord</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tableau de bord - AgriRec</title>
     <link rel="stylesheet" href="includes/style.css">
 </head>
-<body>
-    <h1>Bienvenue dans l'application</h1>
-    <form id="logout" style="display:inline" action="logout.php" method="get"><button> Se déconnecter </button></form>
-    <ul>
-        <li><a href="parcelles.php">Gestion des parcelles</a></li>
-        <li><a href="engrais.php">Gestion des engrais</a></li>
-        <li><a href="phytosanitaires.php">Gestion des produits phytosanitaires</a></li>
-        <li><a href="interventions_engrais.php">Application d'engrais</a></li>
-        <li><a href="interventions_phyto.php">Application phytosanitaires</a></li>
-        <li><a href="rapport-phyto.php">Rapport des interventions phytosanitaires</a></li>
-        <li><a href="rapport-engrais.php">Rapport des interventions engrais</a></li>
-    </ul>
+
+<body class="cute-background">
+    <header>
+        <div class="logo-area">
+            <img src="assets/logo.png" alt="AgriRec Logo">
+            <h2 style="margin:0; font-size: 1.25rem;">AgriRec - Tableau de bord</h2>
+        </div>
+        <form id="logout" action="logout.php" method="get">
+            <button class="danger">Déconnexion</button>
+        </form>
+    </header>
+
+    <div class="container">
+
+        <div class="dashboard-grid">
+            <a href="parcelles.php" class="nav-card">
+                <h3>Gestion des parcelles</h3>
+                <p>Configurez et listez vos terrains</p>
+                <div style="margin-top: 1rem; font-weight: 600;">Accéder &rarr;</div>
+            </a>
+
+            <a href="engrais.php" class="nav-card">
+                <h3>Gestion des engrais</h3>
+                <p>Catalogue des fertilisants et intrants</p>
+                <div style="margin-top: 1rem; font-weight: 600;">Accéder &rarr;</div>
+            </a>
+
+            <a href="phytosanitaires.php" class="nav-card">
+                <h3>Gestion des phytosanitaires</h3>
+                <p>Inventaire des traitements et protections</p>
+                <div style="margin-top: 1rem; font-weight: 600;">Accéder &rarr;</div>
+            </a>
+        </div>
+        <div class="dashboard-grid">
+            <a href="interventions_engrais.php" class="nav-card">
+                <h3>Application d'engrais</h3>
+                <p>Saisir les apports sur vos parcelles</p>
+                <div style="margin-top: 1rem; font-weight: 600;">Accéder &rarr;</div>
+            </a>
+
+            <a href="interventions_phyto.php" class="nav-card">
+                <h3>Application Phyto</h3>
+                <p>Saisir les traitements phytosanitaires</p>
+                <div style="margin-top: 1rem; font-weight: 600;">Accéder &rarr;</div>
+            </a>
+        </div>
+        <div class="dashboard-grid">
+            <a href="rapport-engrais.php" class="nav-card">
+                <h3>Rapports Engrais</h3>
+                <p>Historique et bilans des fertilisations</p>
+                <div style="margin-top: 1rem; font-weight: 600;">Accéder &rarr;</div>
+            </a>
+
+            <a href="rapport-phyto.php" class="nav-card">
+                <h3>Rapports Phyto</h3>
+                <p>Historique et bilans phytosanitaires</p>
+                <div style="margin-top: 1rem; font-weight: 600;">Accéder &rarr;</div>
+            </a>
+        </div>
+    </div>
 </body>
+
 </html>

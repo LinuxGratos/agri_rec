@@ -1,0 +1,64 @@
+li {
+  list-style-type: none;
+  margin-bottom: 1rem;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 15px;
+}
+th {
+  background-color: #f2f2f2;
+}
+td {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+th, td {
+  border: 2px solid black;
+  padding: 4px;
+  text-align: left;
+}
+th.emptyth {
+  border: 0px none;
+  background-color: #ffffff;
+}
+tfoot {
+  text-align: right;
+  font-weight: bold;
+}
+.intervention-separator {
+  height: 10px;
+  background-color: #ffffff;
+}
+form#logout {
+  display:inline;
+  position: absolute;
+  right: 40px;
+  top: 10px;
+}
+tbody tr:nth-child(odd) {
+  background-color: #cccccc;
+}
+
+tbody tr:nth-child(even) {
+  background-color: #ffffff;
+}
+
+.pagination {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.pagination a, .pagination span {
+  padding: 5px 10px;
+  margin: 0 5px;
+  border: 1px solid #ddd;
+  text-decoration: none;
+}
+
+.pagination .current-page {
+  background-color: #3f87a6;
+  color: #fff;
+}
