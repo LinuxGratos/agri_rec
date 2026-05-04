@@ -65,6 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         parcelle_id INTEGER,
         date DATE NOT NULL,
         annee_culturale INTEGER NOT NULL,
+        stade TEXT NOT NULL,
         FOREIGN KEY (parcelle_id) REFERENCES parcelles(id)
     )");
 
