@@ -91,34 +91,124 @@ $stmt->bindValue(':telepac', $telepac, SQLITE3_TEXT);
 $stmt->bindValue(':password', $password, SQLITE3_TEXT);
 $stmt->execute();
 
-echo "Installation terminée. Les tables ont été créées et l'utilisateur $username a été ajouté.";
+    echo "Installation terminée. Les tables ont été créées et l'utilisateur $username a été ajouté.";
 ?>
 
 <h3> <a href="login.php"> Accueil </a> </h3>
 <?php
-exit;
+    exit;
 }
 ?>
 
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
-    <title>Création du couple utilisateur / mot de passe</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuration - AgriRec</title>
+    <link rel="stylesheet" href="includes/style.css">
+    <style>
+        body {
+            background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('assets/hero.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .setup-wizard {
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+        }
+
+        .setup-wizard section {
+            background: white;
+            padding: 3rem;
+            border-radius: var(--radius);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .setup-wizard .logo {
+            width: 80px;
+            margin-bottom: 2rem;
+            border-radius: 20px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .setup-wizard h1 {
+            font-size: 2rem;
+            color: var(--primary-dark);
+            margin-bottom: 1rem;
+        }
+
+        .setup-wizard p {
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 2rem;
+            border-radius: var(--radius);
+            margin-bottom: 2rem;
+        }
+    </style>
 </head>
+
 <body>
-    <h1>Bienvenue dans l'installation</h1>
-    <h2>Création du couple utilisateur / mot de passe et saisie du code telepac</h2>
-    <?php if (isset($error)) echo "<p>$error</p>"; ?>
-    <form method="post">
-        <input type="text" name="username" placeholder="Nom d'utilisateur" required><br>
-        <br/>
-        <input type="text" name="entity" placeholder="Nom de société" required><br>
-        <br/>
-        <input type="text" name="telepac" placeholder="Code telepac" required><br>
-        <br/>
-        <input type="password" name="password" placeholder="Mot de passe" required><br>
-        <br/>
-        <input type="submit" value="Création">
-    </form>
+    <div class="setup-wizard">
+        <section>
+            <img src="assets/logo.png" alt="AgriRec Logo" class="logo">
+
+            <?php if ($_SERVER['REQUEST_METHOD'] === 'POST'): ?>
+            <div class="success-message">
+                <h3 style="margin-top:0;">Configuration Terminée !</h3>
+                <p>La base de données a été initialisée avec succès.</p>
+            </div>
+            <a href="login.php" class="button"
+                style="display: block; width: 100%; text-decoration: none; padding: 1rem;">Accéder au Tableau de
+                Bord</a>
+            <?php
+else: ?>
+            <h1>Bienvenue</h1>
+            <p>Initialisez votre instance <b>AgriRec</b>. Veuillez créer le compte administrateur principal.</p>
+
+            <form method="post">
+                <div style="text-align: left; margin-bottom: 1.5rem;">
+                    <label
+                        style="display:block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.25rem;">Identifiant
+                        Administrateur</label>
+                    <input type="text" name="username" placeholder="ex: admin_exploitation" required
+                        style="width:100%;">
+                </div>
+
+                <div style="text-align: left; margin-bottom: 1.5rem;">
+                    <label style="display:block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.25rem;">N° de
+                        compte Telepac</label>
+                    <input type="text" name="telepac" placeholder="ex: 0123456" required style="width:100%;">
+                </div>
+
+                <div style="text-align: left; margin-bottom: 2.5rem;">
+                    <label style="display:block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.25rem;">Mot de
+                        passe sécurisé</label>
+                    <input type="password" name="password" placeholder="••••••••" required style="width:100%;">
+                </div>
+
+                <button type="submit" style="width:100%; padding: 1.25rem; font-size: 1.1rem;">Démarrer
+                    l'installation</button>
+            </form>
+            <?php
+endif; ?>
+        </section>
+    </div>
 </body>
+
 </html>

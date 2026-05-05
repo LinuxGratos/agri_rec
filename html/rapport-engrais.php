@@ -62,7 +62,7 @@ $totals = [];
 
 while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
     $interventions[] = $row;
-    
+
     $key = $row['parcelle_nom'];
     if (!isset($totals[$key])) {
         $totals[$key] = [
@@ -79,137 +79,266 @@ while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
 ?>
 <!DOCTYPE html>
 <html lang="fr">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Rapport des interventions phytosanitaires</title>
-        <link rel="stylesheet" href="includes/style.css" />
-    </head>
-    <body>
-        <h3> Navigation dans les pages de gestion </h3>
-        <ul>
-            <li><a href="interventions_engrais.php">Création des interventions engrais</a></li>
-            <li><a href="index.php">Retour à l'accueil</a></li>
-        </ul>
-        <h1>Rapport des interventions engrais</h1>
-        <h2><?php echo $interventions[0]['entity']; ?> - Telepac: <?php echo $interventions[0]['telepac']; ?></h2>
-        <!-- Formulaire de tri -->
-        <form method="get">
-            <select name="annee">
-                <option value="">Toutes les années</option>
-                <?php
-                $annees = $db->query("SELECT DISTINCT annee_culturale FROM interventions_engrais ORDER BY annee_culturale");
-                while ($annee = $annees->fetchArray(SQLITE3_ASSOC)) {
-                    $selected = ($annee['annee_culturale'] == $annee_filter) ? 'selected' : '';
-                    echo "<option value='" . htmlspecialchars($annee['annee_culturale']) . "' $selected>" . htmlspecialchars($annee['annee_culturale']) . "</option>";
-                }
-                ?>
-            </select>
-            <select name="parcelle">
-                <option value="">Toutes les parcelles</option>
-                <?php
-                $parcelles = $db->query("SELECT id, nom FROM parcelles ORDER BY nom");
-                while ($parcelle = $parcelles->fetchArray(SQLITE3_ASSOC)) {
-                    $selected = ($parcelle['id'] == $parcelle_filter) ? 'selected' : '';
-                    echo "<option value='" . htmlspecialchars($parcelle['id']) . "' $selected>" . htmlspecialchars_decode($parcelle['nom']) . "</option>";
-                }
-                ?>
-            </select>
-            <input type="submit" value="Filtrer">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rapport Engrais - AgriRec</title>
+    <link rel="stylesheet" href="includes/style.css" />
+    <style>
+        .report-header {
+            background: var(--primary-dark);
+            color: white;
+            padding: 1.5rem;
+            border-radius: var(--radius) var(--radius) 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .report-meta {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .total-row {
+            background: #f8f9fa;
+            font-weight: 700;
+            color: var(--primary-dark);
+        }
+
+        .badge {
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="logo-area">
+            <a href="index.php" style="display: flex; align-items: center; gap: 0.5rem; color: inherit;">
+                <img src="assets/logo.png" alt="AgriRec Logo">
+                <h2 style="margin:0; font-size: 1.25rem;">AgriRec</h2>
+            </a>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="index.php">Tableau de bord</a></li>
+                <li><a href="interventions_engrais.php">Saisir Intervention</a></li>
+            </ul>
+        </nav>
+        <form id="logout" action="logout.php" method="get">
+            <button class="danger">Déconnexion</button>
         </form>
+    </header>
+
+    <div class="container">
+        <div style="margin-bottom: 2rem;">
+            <h1>Rapport des interventions engrais</h1>
+            <p style="color: var(--text-muted);">Consultez les bilans de fertilisation par parcelle et campagne.</p>
+        </div>
+
+        <section class="card" style="margin-bottom: 3rem;">
+            <h3 style="display: inline">Filtrer le rapport</h3><a class="button" style="margin-left: 20px" href="rapport-engrais-brut.php?annee=<?php echo $annee_filter; ?>&parcelle=<?php echo $parcelle_filter; ?>" target="_blank">Imprimer le rapport</a>
+            <form method="get" style="display: flex; gap: 1rem; align-items: flex-end;">
+                <div style="flex:1;">
+                    <label style="display:block; font-size: 1rem; font-weight: 600; margin-bottom: 0.25rem;">Année
+                        Culturale</label>
+                    <select name="annee" style="width:100%;">
+                        <option value="">Toutes les années</option>
+                        <?php
+$annees = $db->query("SELECT DISTINCT annee_culturale FROM interventions_engrais ORDER BY annee_culturale");
+while ($annee = $annees->fetchArray(SQLITE3_ASSOC)) {
+    $selected = ($annee['annee_culturale'] == $annee_filter) ? 'selected' : '';
+    echo "<option value='" . htmlspecialchars($annee['annee_culturale']) . "' $selected>" . htmlspecialchars($annee['annee_culturale']) . "</option>";
+}
+?>
+                    </select>
+                </div>
+                <div style="flex:1;">
+                    <label
+                        style="display:block; font-size: 1rem; font-weight: 600; margin-bottom: 0.25rem;">Parcelle</label>
+                    <select name="parcelle" style="width:100%;">
+                        <option value="">Toutes les parcelles</option>
+                        <?php
+$parcelles = $db->query("SELECT id, nom FROM parcelles ORDER BY nom");
+while ($parcelle = $parcelles->fetchArray(SQLITE3_ASSOC)) {
+    $selected = ($parcelle['id'] == $parcelle_filter) ? 'selected' : '';
+    echo "<option value='" . htmlspecialchars($parcelle['id']) . "' $selected>" . htmlspecialchars_decode($parcelle['nom']) . "</option>";
+}
+?>
+                    </select>
+                </div>
+                <button type="submit">Appliquer les filtres</button>
+            </form>
+        </section>
 
         <?php if (empty($interventions)) { ?>
-        <p>Aucune intervention trouvée pour les critères sélectionnés.</p>
-        <?php } else {
-            $current_parcelle = '';
-            $current_annee = '';
-            $totals = ['NO3' => 0, 'P2O5' => 0, 'K2O' => 0, 'SO3' => 0, 'MgO' => 0, 'CaO' => 0];
+        <div class="card" style="text-align: center; color: var(--text-muted);">
+            <p>Aucune intervention trouvée pour les critères sélectionnés.</p>
+        </div>
+        <?php
+}
+else {
+    $current_parcelle = '';
+    $current_annee = '';
+    $totals = ['NO3' => 0, 'P2O5' => 0, 'K2O' => 0, 'SO3' => 0, 'MgO' => 0, 'CaO' => 0];
 
-            function afficherTotal($annee, $totals) {
-        ?>
-                <tr class="total-row">
-                    <td colspan="5">Total pour l'année <?php echo htmlspecialchars($annee); ?></td>
-                    <td><?php echo round($totals['NO3'], 2); ?></td>
-                    <td><?php echo round($totals['P2O5'], 2); ?></td>
-                    <td><?php echo round($totals['K2O'], 2); ?></td>
-                    <td><?php echo round($totals['SO3'], 2); ?></td>
-                    <td><?php echo round($totals['MgO'], 2); ?></td>
-                    <td><?php echo round($totals['CaO'], 2); ?></td>
-                </tr>
-                </table>
-            <?php
+    function afficherTotal($annee, $totals)
+    {
+?>
+        <tr class="total-row">
+            <td colspan="5" style="text-align: right; padding-right: 2rem;">TOTAL CUMULÉ (U/ha)</td>
+            <td>
+                <?php echo round($totals['NO3'], 2); ?>
+            </td>
+            <td>
+                <?php echo round($totals['P2O5'], 2); ?>
+            </td>
+            <td>
+                <?php echo round($totals['K2O'], 2); ?>
+            </td>
+            <td>
+                <?php echo round($totals['SO3'], 2); ?>
+            </td>
+            <td>
+                <?php echo round($totals['MgO'], 2); ?>
+            </td>
+            <td>
+                <?php echo round($totals['CaO'], 2); ?>
+            </td>
+        </tr>
+        </tbody>
+        </table>
+    </div>
+    </div>
+    <?php
+    }
+
+    foreach ($interventions as $index => $intervention) {
+        if ($intervention['parcelle_nom'] !== $current_parcelle) {
+            if ($current_parcelle !== '') {
+                afficherTotal($current_annee, $totals);
             }
+            ;
+            $current_parcelle = $intervention['parcelle_nom'];
+            $current_annee = '';
+        }
+        ;
 
-            foreach ($interventions as $index => $intervention) {
-                if ($intervention['parcelle_nom'] !== $current_parcelle) {
-                    if ($current_parcelle !== '') {
-                        afficherTotal($current_annee, $totals);
-                    };
-                    $current_parcelle = $intervention['parcelle_nom'];
-                    $current_annee = '';
-                };
-
-                if ($intervention['annee_culturale'] !== $current_annee) {
-                    if ($current_annee !== '') {
-                        afficherTotal($current_annee, $totals);
-                    };
-                    $totals = ['NO3' => 0, 'P2O5' => 0, 'K2O' => 0, 'SO3' => 0, 'MgO' => 0, 'CaO' => 0];
-                    ?>
-                    <table>
-                        <tr>
-                            <th>
-                            Année culturale : <?php echo htmlspecialchars($intervention['annee_culturale']); ?> |
-                            Parcelle : <?php echo htmlspecialchars_decode($intervention['parcelle_nom']); ?> <br/>
-                            Ilot : <?php echo htmlspecialchars($intervention['parcelle_ilot']); ?> <br/>
-                            Surface : <?php echo htmlspecialchars($intervention['parcelle_surface']); ?> |
-                            Culture : <?php echo htmlspecialchars_decode($intervention['type_culture']); ?>
-                            </th>
-                            <th colspan="10" class="emptyth"></th>
-                        </tr>
-                        <tr>
-                            <th>Date</th>
-                            <th>Engrais</th>
-                            <th>Unité</th>
-                            <th>Quantité totale</th>
-                            <th>Quantité par ha</th>
-                            <th>NO3 (U/ha)</th>
-                            <th>P2O5 (U/ha)</th>
-                            <th>K2O (U/ha)</th>
-                            <th>SO3 (U/ha)</th>
-                            <th>MgO (U/ha)</th>
-                            <th>CaO (U/ha)</th>
-                        </tr>
+        if ($intervention['annee_culturale'] !== $current_annee) {
+            if ($current_annee !== '') {
+                afficherTotal($current_annee, $totals);
+            }
+            ;
+            $totals = ['NO3' => 0, 'P2O5' => 0, 'K2O' => 0, 'SO3' => 0, 'MgO' => 0, 'CaO' => 0];
+?>
+    <div style="margin-bottom: 3rem; box-shadow: var(--shadow-md); border-radius: var(--radius); overflow: hidden;">
+        <div class="report-header">
+            <div>
+                <h3 style="margin:0; color: white;">Parcelle :
+                    <?php echo htmlspecialchars_decode($intervention['parcelle_nom']); ?>
+                </h3>
+                <div class="report-meta">
+                    <span>Ilot: <b>
+                            <?php echo htmlspecialchars($intervention['parcelle_ilot']); ?>
+                        </b></span>
+                    <span>Surface: <b>
+                            <?php echo htmlspecialchars($intervention['parcelle_surface']); ?> ha
+                        </b></span>
+                    <span>Culture: <b>
+                            <?php echo htmlspecialchars_decode($intervention['type_culture']); ?>
+                        </b></span>
+                </div>
+            </div>
+            <div style="text-align: right;">
+                <span class="badge">CAMPAGNE
+                    <?php echo htmlspecialchars($intervention['annee_culturale']); ?>
+                </span>
+            </div>
+        </div>
+        <div class="table-container" style="border-radius: 0; box-shadow: none; margin-bottom: 0;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Engrais</th>
+                        <th>Qté Totale</th>
+                        <th>Qté/ha</th>
+                        <th>Unité</th>
+                        <th>NO3</th>
+                        <th>P2O5</th>
+                        <th>K2O</th>
+                        <th>SO3</th>
+                        <th>MgO</th>
+                        <th>CaO</th>
+                    </tr>
+                </thead>
+                <tbody>
                     <?php
-                    $current_annee = $intervention['annee_culturale'];
-                } ;
-                ?>
-                <tr>
-                    <td><?php echo htmlspecialchars($intervention['date']); ?></td>
-                    <td><?php echo htmlspecialchars_decode($intervention['engrais_nom']); ?></td>
-                    <td><?php echo htmlspecialchars($intervention['engrais_unite']); ?></td>
-                    <td><?php echo htmlspecialchars($intervention['quantite']); ?></td>
-                    <td><?php echo htmlspecialchars($intervention['quantite_par_ha']); ?></td>
-                    <td><?php echo round($intervention['total_NO3'], 2); ?></td>
-                    <td><?php echo round($intervention['total_P2O5'], 2); ?></td>
-                    <td><?php echo round($intervention['total_K2O'], 2); ?></td>
-                    <td><?php echo round($intervention['total_SO3'], 2); ?></td>
-                    <td><?php echo round($intervention['total_MgO'], 2); ?></td>
-                    <td><?php echo round($intervention['total_CaO'], 2); ?></td>
-                </tr>
-                <?php
-                $totals['NO3'] += $intervention['total_NO3'];
-                $totals['P2O5'] += $intervention['total_P2O5'];
-                $totals['K2O'] += $intervention['total_K2O'];
-                $totals['SO3'] += $intervention['total_SO3'];
-                $totals['MgO'] += $intervention['total_MgO'];
-                $totals['CaO'] += $intervention['total_CaO'];
+            $current_annee = $intervention['annee_culturale'];
+        }
+        ;
+?>
+                    <tr>
+                        <td>
+                            <?php echo htmlspecialchars($intervention['date']); ?>
+                        </td>
+                        <td style="font-weight: 500;">
+                            <?php echo htmlspecialchars_decode($intervention['engrais_nom']); ?>
+                        </td>
+                        <td>
+                            <?php echo htmlspecialchars($intervention['quantite']); ?>
+                        </td>
+                        <td>
+                            <?php echo htmlspecialchars($intervention['quantite_par_ha']); ?>
+                        </td>
+                        <td style="color: var(--text-muted); font-size: 0.8rem;">
+                            <?php echo htmlspecialchars($intervention['engrais_unite']); ?>
+                        </td>
+                        <td>
+                            <?php echo round($intervention['total_NO3'], 2); ?>
+                        </td>
+                        <td>
+                            <?php echo round($intervention['total_P2O5'], 2); ?>
+                        </td>
+                        <td>
+                            <?php echo round($intervention['total_K2O'], 2); ?>
+                        </td>
+                        <td>
+                            <?php echo round($intervention['total_SO3'], 2); ?>
+                        </td>
+                        <td>
+                            <?php echo round($intervention['total_MgO'], 2); ?>
+                        </td>
+                        <td>
+                            <?php echo round($intervention['total_CaO'], 2); ?>
+                        </td>
+                    </tr>
+                    <?php
+        $totals['NO3'] += $intervention['total_NO3'];
+        $totals['P2O5'] += $intervention['total_P2O5'];
+        $totals['K2O'] += $intervention['total_K2O'];
+        $totals['SO3'] += $intervention['total_SO3'];
+        $totals['MgO'] += $intervention['total_MgO'];
+        $totals['CaO'] += $intervention['total_CaO'];
 
-                // Si c'est la dernière intervention, afficher le total
-                if ($index === count($interventions) - 1) {
-                    afficherTotal($current_annee, $totals);
-                };
-            };
-        }; ?>
+        if ($index === count($interventions) - 1) {
+            afficherTotal($current_annee, $totals);
+        }
+        ;
+    }
+    ;
+}
+; ?>
+        </div>
+</body>
 
-    </body>
 </html>

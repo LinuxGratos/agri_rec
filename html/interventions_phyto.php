@@ -9,7 +9,8 @@ if (!isset($_SESSION['user_id'])) {
 
 $db = getDB();
 
-function clean_input($data) {
+function clean_input($data)
+{
     return htmlspecialchars(stripslashes(trim($data)));
 }
 
@@ -80,121 +81,263 @@ $interventions = $db->query('SELECT ip.*, p.nom as parcelle_nom, p.surface, p.il
 
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
-    <title>Gestion des interventions phytosanitaires</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interventions Phyto - AgriRec</title>
+    <link rel="stylesheet" href="includes/style.css">
     <script>
         function addProduit() {
             var container = document.getElementById('produits-container');
             var newProduit = document.createElement('div');
+            newProduit.className = 'card';
+            newProduit.style.background = '#f8f9fa';
+            newProduit.style.marginTop = '1rem';
+            newProduit.style.padding = '1rem';
             newProduit.innerHTML = `
-                Produit phytosanitaire : <select name="produit_id[]" required> <br/>
-                    <?php
-                    $produits->reset();
-                    while ($produit = $produits->fetchArray(SQLITE3_ASSOC)):
-                    ?>
-                        <option value="<?php echo $produit['id']; ?>"><?php echo $produit['nom']; ?></option>
-                    <?php endwhile; ?>
-                </select>
-                 Volume total appliqué sur la parcelle : <input type="number" name="volume_total[]" step="0.01" placeholder="Volume total" required> <br/>
-                 Cible de l'intervention : <input type="text" name="cible[]" placeholder="Cible" required> <br/>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem;">
+                    <div>
+                        <label style="font-size: 0.8rem; font-weight: 600;">Produit</label>
+                        <select name="produit_id[]" required style="width:100%;">
+                            <?php
+$produits->reset();
+while ($produit = $produits->fetchArray(SQLITE3_ASSOC)):
+?>
+                                <option value="<?php echo $produit['id']; ?>"><?php echo htmlspecialchars_decode($produit['nom']); ?></option>
+                            <?php
+endwhile; ?>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-size: 0.8rem; font-weight: 600;">Volume total</label>
+                        <input type="number" name="volume_total[]" step="0.01" placeholder="ex: 2.5" required style="width:100%;">
+                    </div>
+                    <div>
+                        <label style="font-size: 0.8rem; font-weight: 600;">Cible</label>
+                        <input type="text" name="cible[]" placeholder="ex: Adventices" required style="width:100%;">
+                    </div>
+                    <div style="display: flex; align-items: flex-end;">
+                        <button type="button" class="danger" onclick="this.parentElement.parentElement.parentElement.remove()" style="width:100%;">Retirer</button>
+                    </div>
+                </div>
             `;
             container.appendChild(newProduit);
         }
     </script>
-    <link rel="stylesheet" href="includes/style.css">
 </head>
-<body>
-    <h3> Navigation dans les pages de gestion </h3>
-    <ul>
-        <li><a href="parcelles.php">Création des parcelles d'intervention</a></li>
-        <li><a href="phytosanitaires.php">Création des produits phytosanitaires</a></li>
-        <li><a href="rapport-phyto.php">Visualisation des interventions phytosanitaires</a></li>
-        <li><a href="index.php">Retour à l'accueil</a></li>
-    </ul>
-    <h1>Gestion des interventions phytosanitaires</h1>
-    <h3>Ajouter une intervention</h3>
-    <form method="post">
-        <input type="hidden" name="action" value="create">
-        Parcelle : <select name="parcelle_id" required>
-            <option value="" disabled selected>Choisir une parcelle</option>
-            <?php
-            while ($parcelle = $parcelles->fetchArray(SQLITE3_ASSOC)):
-            ?>
-                <option value="<?php echo $parcelle['id']; ?>"><?php echo $parcelle['nom']; ?></option>
-            <?php endwhile; ?>
-        </select><br/>
-        <br/>
-        Année culturale : <input type="number" min="<?php echo date("Y")-1; ?>" max="<?php echo date("Y")+3; ?>" step="1" value="<?php echo date("Y"); ?>" name="annee_culturale" placeholder="Année culturale" required> </br>
-        </br>
-        Date d'intervention : <input type="date" name="date" required><br/>
-        Heure d'intervention : <input type="time" name="heure" required><br/>
-        <br/>
-        Stade de la culture : <input type="text" name="stade" placeholder="Stade" required> </br>
-        </br>
-        <div id="produits-container">
-            <div>
-                Produit phytosanitaire : <select name="produit_id[]" required>
-                    <option value="" disabled selected>Choisir un phyto</option>
-                    <?php
-                    while ($produit = $produits->fetchArray(SQLITE3_ASSOC)):
-                    ?>
-                        <option value="<?php echo $produit['id']; ?>"><?php echo $produit['nom']; ?></option>
-                    <?php endwhile; ?>
-                </select>
-                Volume total appliqué sur la parcelle : <input type="number" name="volume_total[]" step="0.01" placeholder="Volume total" required> <br/>
-                Cible de l'intervention : <input type="text" name="cible[]" placeholder="Cible" required>
-            </div>
-        </div>
-        <br/>
-        <button type="button" onclick="addProduit()">Ajouter un produit</button>
-        <br/>
-        <br/>
-        <input type="submit" value="Enregistrer l'intervention">
-    </form>
 
-    <h3>Liste des interventions</h3>
-    <table>
-        <tr>
-            <th>Année culturale</th>
-            <th>Date</th>
-            <th>Parcelle</th>
-            <th>Ilot</th>
-            <th>Stade</th>
-            <th>Produits utilisés</th>
-            <th>Actions</th>
-        </tr>
-        <?php while ($intervention = $interventions->fetchArray(SQLITE3_ASSOC)): ?>
-        <tr>
-            <td><?php echo htmlspecialchars($intervention['annee_culturale']); ?></td>
-            <td><?php echo htmlspecialchars($intervention['date']); ?></td>
-            <td><?php echo htmlspecialchars_decode($intervention['parcelle_nom']); ?></td>
-            <td><?php echo htmlspecialchars($intervention['parcelle_ilot']); ?></td>
-            <td><?php echo htmlspecialchars_decode($intervention['stade']); ?></td>
-            <td>
-                <?php
-                $details = $db->query('SELECT dip.*, pp.nom as produit_nom,  pp.unite_emballage as produit_unite
-                                       FROM details_interventions_phytosanitaires dip
-                                       JOIN produits_phytosanitaires pp ON dip.produit_id = pp.id
-                                       WHERE dip.intervention_id = ' . $intervention['id']);
-                while ($detail = $details->fetchArray(SQLITE3_ASSOC)) {
-                    echo htmlspecialchars_decode($detail['produit_nom']) . ' : ' .
-                         htmlspecialchars($detail['volume_total']) . ' ' .
-                         htmlspecialchars($detail['produit_unite']) . ' Volume sur la parcelle | ' .
-                         htmlspecialchars($detail['volume_total'] / $intervention['surface']) . ' ' .
-                         htmlspecialchars($detail['produit_unite']) . '/ha, cible : ' .
-                         htmlspecialchars_decode($detail['cible']) . ' <br>';
-                }
-                ?>
-            </td>
-            <td>
-                <form method="post" style="display:inline;">
-                    <input type="hidden" name="action" value="delete">
-                    <input type="hidden" name="id" value="<?php echo $intervention['id']; ?>">
-                    <input type="submit" value="Supprimer" onclick="return confirm('Etes-vous sûr de vouloir supprimer cette intervention ?');">
-                </form>
-            </td>
-        </tr>
-        <?php endwhile; ?>
-    </table>
+<body>
+    <header>
+        <div class="logo-area">
+            <a href="index.php" style="display: flex; align-items: center; gap: 0.5rem; color: inherit;">
+                <img src="assets/logo.png" alt="AgriRec Logo">
+                <h2 style="margin:0; font-size: 1.25rem;">AgriRec</h2>
+            </a>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="index.php">Tableau de bord</a></li>
+                <li><a href="phytosanitaires.php">Catalogue Phyto</a></li>
+                <li><a href="rapport-phyto.php">Rapports</a></li>
+            </ul>
+        </nav>
+        <form id="logout" action="logout.php" method="get">
+            <button class="danger">Déconnexion</button>
+        </form>
+    </header>
+
+    <div class="container">
+        <div style="margin-bottom: 2rem;">
+            <h1>Interventions Phytosanitaires</h1>
+            <p style="color: var(--text-muted);">Enregistrez les traitements de protection des cultures par parcelle.
+            </p>
+        </div>
+
+        <section class="card">
+            <h3>Saisir une nouvelle intervention</h3>
+            <form method="post">
+                <input type="hidden" name="action" value="create">
+
+                <div
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; width: 100%; margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 1px solid var(--border-color);">
+                    <div>
+                        <label
+                            style="display:block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.25rem;">Parcelle</label>
+                        <select name="parcelle_id" required style="width:100%;">
+                            <option value="" disabled selected>Choisir une parcelle</option>
+                            <?php
+$parcelles->reset();
+while ($parcelle = $parcelles->fetchArray(SQLITE3_ASSOC)): ?>
+                            <option value="<?php echo $parcelle['id']; ?>">
+                                <?php echo htmlspecialchars_decode($parcelle['nom']); ?> (<?php echo $parcelle['surface']; ?> ha)
+                            </option>
+                            <?php
+endwhile; ?>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display:block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.25rem;">Année
+                            culturale</label>
+                        <input type="number"
+                            name="annee_culturale"
+                            min="<?php echo date(" Y") - 1; ?>"
+                            max="<?php echo date("Y") + 3; ?>"
+                            step="1"
+                            value="<?php echo date("Y"); ?>"
+                            required
+                            style="width:100%;">
+                    </div>
+                    <div>
+                        <label
+                            style="display:block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.25rem;">Date</label>
+                        <input type="date" name="date" value="<?php echo date('Y-m-d'); ?>" required
+                            style="width:100%;">
+                    </div>
+                    <div>
+                        <label
+                            style="display:block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.25rem;">Heure</label>
+                        <input type="time" name="heure" value="<?php echo date('H:i'); ?>" required style="width:100%;">
+                    </div>
+
+                    <div>
+                        <label
+                            style="display:block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.25rem;">Stade</label>
+                        <input type="text" name="stade" value="" placeholder="Ex: 1er noeud" required style="width:100%;">
+                    </div>
+                </div>
+
+                <div id="produits-container">
+                    <h4 style="margin-bottom: 1rem;">Produits utilisés dans ce mélange</h4>
+                    <div class="card" style="background: #f8f9fa; padding: 1rem;">
+                        <div
+                            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem;">
+                            <div>
+                                <label style="font-size: 0.8rem; font-weight: 600;">Produit</label>
+                                <select name="produit_id[]" required style="width:100%;">
+                                    <option value="" disabled selected>Choisir un phyto</option>
+                                    <?php
+$produits->reset();
+while ($produit = $produits->fetchArray(SQLITE3_ASSOC)): ?>
+                                    <option value="<?php echo $produit['id']; ?>">
+                                        <?php echo htmlspecialchars_decode($produit['nom']); ?>
+                                    </option>
+                                    <?php
+endwhile; ?>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="font-size: 0.8rem; font-weight: 600;">Volume total</label>
+                                <input type="number" name="volume_total[]" step="0.01" placeholder="ex: 2.5" required
+                                    style="width:100%;">
+                            </div>
+                            <div colspan="2">
+                                <label style="font-size: 0.8rem; font-weight: 600;">Cible</label>
+                                <input type="text" name="cible[]" placeholder="ex: Adventices" required
+                                    style="width:100%;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 1rem; display: flex; justify-content: space-between; align-items: center;">
+                    <button type="button" class="secondary" onclick="addProduit()">+ Ajouter un autre produit à ce
+                        mélange</button>
+                    <input type="submit" value="Enregistrer l'intervention">
+                </div>
+            </form>
+        </section>
+
+        <section>
+            <h3>Historique des interventions phyto</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Campagne</th>
+                            <th>Parcelle (Ilot)</th>
+                            <th>Date / Heure</th>
+                            <th>Stade</th>
+                            <th>Détails des produits & doses</th>
+                            <th style="text-align: right;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php while ($intervention = $interventions->fetchArray(SQLITE3_ASSOC)): ?>
+                        <tr>
+                            <td><span class="badge" style="background: var(--primary-color); color: white;">
+                                    <?php echo htmlspecialchars($intervention['annee_culturale']); ?>
+                                </span>
+                            </td>
+                            <td>
+                                <div>
+                                    <?php echo htmlspecialchars_decode($intervention['parcelle_nom']); ?>
+                                </div>
+                                <div style="font-size: 0.8rem; color: var(--text-muted);">Ilot:
+                                    <?php echo htmlspecialchars($intervention['parcelle_ilot']); ?>
+                                </div>
+                            </td>
+                            <td>
+                                <div style="font-weight: 600;">
+                                    <?php echo date('d/m/Y', strtotime($intervention['date'])); ?>
+                                </div>
+                                <div style="font-size: 0.8rem; color: var(--text-muted);">
+                                    <?php echo date('H:i', strtotime($intervention['date'])); ?>
+                                </div>
+                            </td>
+                            <td>
+                                <div>
+                                    <?php echo htmlspecialchars_decode($intervention['stade']); ?>
+                                </div>
+                            </td>
+                            <td>
+                                <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                                    <?php
+    $details = $db->query('SELECT dip.*, pp.nom as produit_nom, pp.unite_emballage as produit_unite
+                                                           FROM details_interventions_phytosanitaires dip
+                                                           JOIN produits_phytosanitaires pp ON dip.produit_id = pp.id
+                                                           WHERE dip.intervention_id = ' . $intervention['id']);
+    while ($detail = $details->fetchArray(SQLITE3_ASSOC)):
+?>
+                                    <div
+                                        style="background: #f1f3f5; padding: 0.5rem; border-radius: 6px; font-size: 0.85rem;">
+                                        <b>
+                                            <?php echo htmlspecialchars_decode($detail['produit_nom']); ?>
+                                        </b>:
+                                        <?php echo htmlspecialchars($detail['volume_total']); ?>
+                                        <?php echo htmlspecialchars($detail['produit_unite']); ?>
+                                        (<span style="color: var(--primary-color); font-weight: 600;">
+                                            <?php echo round($detail['volume_total'] / $intervention['surface'], 3); ?>
+                                            <?php echo htmlspecialchars($detail['produit_unite']); ?>/ha
+                                        </span>)
+                                        <br /><small style="color: var(--text-muted);">Cible:
+                                            <?php echo htmlspecialchars_decode($detail['cible']); ?>
+                                        </small>
+                                    </div>
+                                    <?php
+    endwhile; ?>
+                                </div>
+                            </td>
+                            <td style="text-align: right;">
+                                <form method="post" style="display:inline;">
+                                    <input type="hidden" name="action" value="delete">
+                                    <input type="hidden" name="id" value="<?php echo $intervention['id']; ?>">
+                                    <button type="submit" class="danger"
+                                        onclick="return confirm('Supprimer cette intervention ?');">Supprimer</button>
+                                </form>
+                            </td>
+                        </tr>
+                        <?php
+endwhile; ?>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
 </body>
+
+</html>
+
+</body>
+
 </html>

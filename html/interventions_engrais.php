@@ -89,158 +89,255 @@ $interventions = $db->query('SELECT ie.*, p.nom as parcelle_nom, e.nom as engrai
 
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestion des interventions phytosanitaires</title>
+    <title>Interventions Engrais - AgriRec</title>
     <link rel="stylesheet" href="includes/style.css">
 </head>
+
 <body>
-    <h3> Navigation dans les pages de gestion </h3>
-    <ul>
-        <li><a href="engrais.php">Création des engrais</a></li>
-        <li><a href="parcelles.php">Création des parcelles</a></li>
-        <li><a href="rapport-engrais.php">Visualisation des interventions engrais</a></li>
-        <li><a href="index.php">Retour à l'accueil</a></li>
-    </ul>
-
-    <h1>Gestion des interventions d'engrais</h1>
-
-    <h3>Ajouter une intervention</h3>
-    <form method="post">
-        <input type="hidden" name="action" value="create">
-        <select name="parcelle_id" required>
-            <option value="" disabled selected>Choisir une parcelle</option>
-            <?php while ($parcelle = $parcelles->fetchArray(SQLITE3_ASSOC)): ?>
-                <option value="<?php echo $parcelle[
-                    "id"
-                ]; ?>"><?php echo $parcelle["nom"]; ?></option>
-            <?php endwhile; ?>
-        </select>
-        <select name="engrais_id" required>
-            <option value="" disabled selected>Choisir un engrais</option>
-            <?php while ($eng = $engrais->fetchArray(SQLITE3_ASSOC)): ?>
-                <option value="<?php echo $eng["id"]; ?>"><?php echo $eng[
-    "nom"
-]; ?></option>
-            <?php endwhile; ?>
-        </select>
-        <input type="date" name="date" required>
-        <input type="number" name="quantite" placeholder="Quantité totale" required>
-        <input type="number" name="annee_culturale" min="<?php echo date("Y") -
-            1; ?>" max="<?php echo date("Y") +
-    3; ?>" step="1" value="<?php echo date(
-    "Y",
-); ?>" placeholder="Année culturale" required>
-        <input type="submit" value="Ajouter">
-    </form>
-
-    <h3>Liste des interventions</h3>
-    <table>
-        <tr>
-            <th>Année culturale</th>
-            <th>Date</th>
-            <th>Parcelle</th>
-            <th>Engrais</th>
-            <th>Unité</th>
-            <th>Quantité totale</th>
-            <th>Actions</th>
-        </tr>
-        <?php while (
-            $intervention = $interventions->fetchArray(SQLITE3_ASSOC)
-        ): ?>
-        <tr>
-            <td><?php echo htmlspecialchars(
-                $intervention["annee_culturale"],
-            ); ?></td>
-            <td><?php echo htmlspecialchars($intervention["date"]); ?></td>
-            <td><?php echo htmlspecialchars_decode(
-                $intervention["parcelle_nom"],
-            ); ?></td>
-            <td><?php echo htmlspecialchars_decode(
-                $intervention["engrais_nom"],
-            ); ?></td>
-            <td><?php echo htmlspecialchars(
-                $intervention["engrais_unite"],
-            ); ?></td>
-            <td><?php echo htmlspecialchars($intervention["quantite"]); ?></td>
-
-            <td>
-                <form method="post" style="display:inline;">
-                    <input type="hidden" name="action" value="delete">
-                    <input type="hidden" name="id" value="<?php echo $intervention[
-                        "id"
-                    ]; ?>">
-                    <input type="submit" value="Supprimer" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette intervention ?');">
-                </form>
-                <button onclick="showUpdateForm(<?php echo htmlspecialchars(
-                    json_encode($intervention),
-                ); ?>)">Modifier</button>
-            </td>
-        </tr>
-        <?php endwhile; ?>
-    </table>
-
-    <div id="updateForm" style="display:none;">
-        <h3>Modifier une intervention</h3>
-        <form method="post">
-            <input type="hidden" name="action" value="update">
-            <input type="hidden" name="id" id="update_id">
-
-            <table>
-                <tr>
-                    <td>Parcelle</td>
-                    <td>Engrais</td>
-                    <td>Date</td>
-                    <td>Quantité totale</td>
-                    <td>Année culturale</td>
-                </tr>
-                <tr>
-                    <td><select name="parcelle_id" id="update_parcelle_id" required>
-                        <option value="" disabled selected>Choisir une parcelle</option>
-                        <?php
-                        $parcelles->reset();
-                        while (
-                            $parcelle = $parcelles->fetchArray(SQLITE3_ASSOC)
-                        ): ?>
-                            <option value="<?php echo $parcelle[
-                                "id"
-                            ]; ?>"><?php echo $parcelle["nom"]; ?></option>
-                        <?php endwhile;
-                        ?>
-                    </select></td>
-                    <td><select name="engrais_id" id="update_engrais_id" required>
-                        <option value="" disabled selected>Choisir une engrais</option>
-                        <?php
-                        $engrais->reset();
-                        while ($eng = $engrais->fetchArray(SQLITE3_ASSOC)): ?>
-                            <option value="<?php echo $eng[
-                                "id"
-                            ]; ?>"><?php echo $eng["nom"]; ?></option>
-                        <?php endwhile;
-                        ?>
-                    </select></td>
-                    <td><input type="date" name="date" id="update_date" required></td>
-                    <td><input type="number" name="quantite" id="update_quantite" step="0.01" required></td>
-                    <td><input type="number" name="annee_culturale" id="update_annee_culturale" required></td>
-                </tr>
-            </table>
-
-            <input type="submit" value="Modifier">
+    <header>
+        <div class="logo-area">
+            <a href="index.php" style="display: flex; align-items: center; gap: 0.5rem; color: inherit;">
+                <img src="assets/logo.png" alt="AgriRec Logo">
+                <h2 style="margin:0; font-size: 1.25rem;">AgriRec</h2>
+            </a>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="index.php">Tableau de bord</a></li>
+                <li><a href="engrais.php">Catalogue Engrais</a></li>
+                <li><a href="rapport-engrais.php">Rapports</a></li>
+            </ul>
+        </nav>
+        <form id="logout" action="logout.php" method="get">
+            <button class="danger">Déconnexion</button>
         </form>
+    </header>
+
+    <div class="container">
+        <div style="margin-bottom: 2rem;">
+            <h1>Interventions d'engrais</h1>
+            <p style="color: var(--text-muted);">Enregistrez les apports de fertilisants effectués sur vos parcelles.
+            </p>
+        </div>
+
+        <section class="card">
+            <h3>Saisir une nouvelle intervention</h3>
+            <form method="post">
+                <input type="hidden" name="action" value="create">
+                <div
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; width: 100%;">
+                    <div>
+                        <label
+                            style="display:block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.25rem;">Parcelle</label>
+                        <select name="parcelle_id" required style="width:100%;">
+                            <option value="" disabled selected>Choisir une parcelle</option>
+                            <?php
+$parcelles->reset();
+while ($parcelle = $parcelles->fetchArray(SQLITE3_ASSOC)): ?>
+                            <option value="<?php echo $parcelle[" id"]; ?>">
+                                <?php echo htmlspecialchars_decode($parcelle["nom"]); ?> (<?php echo htmlspecialchars_decode($parcelle["surface"]); ?> ha)
+                            </option>
+                            <?php
+endwhile; ?>
+                        </select>
+                    </div>
+                    <div>
+                        <label
+                            style="display:block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.25rem;">Engrais
+                            utilisé</label>
+                        <select name="engrais_id" required style="width:100%;">
+                            <option value="" disabled selected>Choisir un engrais</option>
+                            <?php
+$engrais->reset();
+while ($eng = $engrais->fetchArray(SQLITE3_ASSOC)): ?>
+                            <option value="<?php echo $eng[" id"]; ?>">
+                                <?php echo htmlspecialchars_decode($eng["nom"]); ?>
+                            </option>
+                            <?php
+endwhile; ?>
+                        </select>
+                    </div>
+                </div>
+
+                <div
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; width: 100%; margin-top: 1rem;">
+                    <div>
+                        <label style="display:block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.25rem;">Date
+                            d'application</label>
+                        <input type="date" name="date" value="<?php echo date('Y-m-d'); ?>" required
+                            style="width:100%;">
+                    </div>
+                    <div>
+                        <label
+                            style="display:block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.25rem;">Quantité
+                            totale</label>
+                        <input type="number" name="quantite" step="0.01" placeholder="ex: 150" required
+                            style="width:100%;">
+                    </div>
+                    <div>
+                        <label style="display:block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.25rem;">Année
+                            culturale</label>
+                        <input type="number"
+                          name="annee_culturale"
+                          min="<?php echo date(" Y") - 1; ?>"
+                          max="<?php echo date("Y") + 3; ?>"
+                          step="1"
+                          value="<?php echo date("Y"); ?>"
+                          required
+                          style="width:100%;">
+                    </div>
+                </div>
+
+                <div style="margin-top: 1.5rem; text-align: right; width: 100%;">
+                    <input type="submit" value="Enregistrer l'intervention">
+                </div>
+            </form>
+        </section>
+
+        <section>
+            <h3>Historique des interventions</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Campagne</th>
+                            <th>Parcelle</th>
+                            <th>Date</th>
+                            <th>Engrais</th>
+                            <th>Quantité</th>
+                            <th style="text-align: right;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+$interventions->reset();
+while ($intervention = $interventions->fetchArray(SQLITE3_ASSOC)): ?>
+                        <tr>
+                            <td><span style="font-weight: 600; color: var(--primary-color);">
+                                    <?php echo htmlspecialchars($intervention["annee_culturale"]); ?>
+                                </span></td>
+                            <td>
+                                <?php echo htmlspecialchars_decode($intervention["parcelle_nom"]); ?>
+                            </td>
+                            <td>
+                                <?php echo date('d/m/Y', strtotime($intervention["date"])); ?>
+                            </td>
+                            <td>
+                                <?php echo htmlspecialchars_decode($intervention["engrais_nom"]); ?>
+                            </td>
+                            <td>
+                                <?php echo htmlspecialchars($intervention["quantite"]); ?>
+                                <?php echo htmlspecialchars($intervention["engrais_unite"]); ?>
+                            </td>
+                            <td style="text-align: right;">
+                                <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                                    <button class="secondary"
+                                        onclick='showUpdateForm(<?php echo json_encode($intervention); ?>)'>Modifier</button>
+                                    <form method="post" style="display:inline;">
+                                        <input type="hidden" name="action" value="delete">
+                                        <input type="hidden" name="id" value="<?php echo $intervention[" id"]; ?>">
+                                        <button type="submit" class="danger"
+                                            onclick="return confirm('Supprimer cette intervention ?');">Supprimer</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        <?php
+endwhile; ?>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Modal de modification -->
+        <div id="updateFormBackdrop"
+            style="display:none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+            <div class="card" style="width: 100%; max-width: 700px; margin: 2rem;">
+                <h3>Modifier l'intervention</h3>
+                <form method="post">
+                    <input type="hidden" name="action" value="update">
+                    <input type="hidden" name="id" id="update_id">
+
+                    <div
+                        style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; width: 100%; margin-bottom: 1rem;">
+                        <div>
+                            <label style="font-size: 0.8rem; font-weight: 600;">Parcelle</label>
+                            <select name="parcelle_id" id="update_parcelle_id" required style="width:100%;">
+                                <?php
+$parcelles->reset();
+while ($parcelle = $parcelles->fetchArray(SQLITE3_ASSOC)): ?>
+                                <option value="<?php echo $parcelle["id"]; ?>">
+                                    <?php echo htmlspecialchars_decode($parcelle["nom"]); ?> (<?php echo htmlspecialchars_decode($parcelle["surface"]); ?> ha)
+                                </option>
+                                <?php
+endwhile; ?>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="font-size: 0.8rem; font-weight: 600;">Engrais</label>
+                            <select name="engrais_id" id="update_engrais_id" required style="width:100%;">
+                                <?php
+$engrais->reset();
+while ($eng = $engrais->fetchArray(SQLITE3_ASSOC)): ?>
+                                <option value="<?php echo $eng["id"]; ?>">
+                                    <?php echo htmlspecialchars_decode($eng["nom"]); ?>
+                                </option>
+                                <?php
+endwhile; ?>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div
+                        style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; width: 100%; margin-bottom: 1.5rem;">
+                        <div>
+                            <label style="font-size: 0.8rem; font-weight: 600;">Date</label>
+                            <input type="date" name="date" id="update_date" required style="width:100%;">
+                        </div>
+                        <div>
+                            <label style="font-size: 0.8rem; font-weight: 600;">Quantité</label>
+                            <input type="number" name="quantite" id="update_quantite" step="0.01" required
+                                style="width:100%;">
+                        </div>
+                        <div>
+                            <label style="font-size: 0.8rem; font-weight: 600;">Année</label>
+                            <input type="number" name="annee_culturale" id="update_annee_culturale"
+                                min="<?php echo date(" Y") - 1; ?>"
+                                max="<?php echo date("Y") + 3; ?>"
+                                step="1"
+                                required
+                                style="width:100%;">
+                        </div>
+                    </div>
+
+                    <div style="display: flex; justify-content: flex-end; gap: 1rem; width: 100%;">
+                        <button type="button" class="secondary" onclick="hideUpdateForm()">Annuler</button>
+                        <input type="submit" value="Enregistrer les modifications">
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 
     <script>
-    function showUpdateForm(intervention) {
-        document.getElementById('updateForm').style.display = 'block';
-        document.getElementById('update_id').value = intervention.id;
-        document.getElementById('update_parcelle_id').value = intervention.parcelle_id;
-        document.getElementById('update_engrais_id').value = intervention.engrais_id;
-        document.getElementById('update_date').value = intervention.date;
-        document.getElementById('update_quantite').value = intervention.quantite;
-        document.getElementById('update_annee_culturale').value = intervention.annee_culturale;
-    }
-    </script>
+        function showUpdateForm(intervention) {
+            document.getElementById('updateFormBackdrop').style.display = 'flex';
+            document.getElementById('update_id').value = intervention.id;
+            document.getElementById('update_parcelle_id').value = intervention.parcelle_id;
+            document.getElementById('update_engrais_id').value = intervention.engrais_id;
+            document.getElementById('update_date').value = intervention.date;
+            document.getElementById('update_quantite').value = intervention.quantite;
+            document.getElementById('update_annee_culturale').value = intervention.annee_culturale;
+        }
 
+        function hideUpdateForm() {
+            document.getElementById('updateFormBackdrop').style.display = 'none';
+        }
+    </script>
 </body>
+
 </html>

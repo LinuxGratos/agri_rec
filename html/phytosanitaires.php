@@ -73,94 +73,165 @@ $produits = $db->query("SELECT * FROM produits_phytosanitaires ORDER BY nom");
 
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Gestion des produits phytosanitaires</title>
+    <title>Produits Phytosanitaires - AgriRec</title>
     <link rel="stylesheet" href="includes/style.css" />
 </head>
+
 <body>
-    <h3> Navigation dans les pages de gestion </h3>
-
-    <ul>
-        <li><a href="interventions_phyto.php">Création d'une intervention phytosanitaire</a></li>
-    </ul>
-    <br/>
-    <p><a href="index.php">Retour à l'accueil</a></p>
-    <h1>Gestion des produits phytosanitaires</h1>
-
-    <h3>Ajouter un produit phytosanitaire</h3>
-    <form method="post">
-        <input type="hidden" name="action" value="create">
-        <input type="text" name="nom" placeholder="Nom du produit" required>
-        <input type="text" name="unite_emballage" placeholder="Unité d'emballage" required>
-        <input type="text" name="amm" placeholder="AMM" required>
-        <input type="submit" value="Ajouter">
-    </form>
-
-    <h2>Liste des produits phytosanitaires</h2>
-    <table>
-        <tr>
-            <th>Nom</th>
-            <th>Unité d'emballage</th>
-            <th>AMM</th>
-            <th>Actions</th>
-        </tr>
-        <?php while ($produit = $produits->fetchArray(SQLITE3_ASSOC)): ?>
-        <tr>
-            <td><?php echo htmlspecialchars_decode($produit["nom"]); ?></td>
-            <td><?php echo htmlspecialchars(
-                $produit["unite_emballage"],
-            ); ?></td>
-            <td><?php echo htmlspecialchars($produit["amm"]); ?></td>
-            <td>
-                <form method="post" style="display:inline;">
-                    <input type="hidden" name="action" value="delete">
-                    <input type="hidden" name="id" value="<?php echo $produit[
-                        "id"
-                    ]; ?>">
-                    <input type="submit" value="Supprimer" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce produit ?');">
-                </form>
-                <button onclick="showUpdateForm(<?php echo htmlspecialchars(
-                    json_encode($produit),
-                ); ?>)">Modifier</button>
-            </td>
-        </tr>
-        <?php endwhile; ?>
-    </table>
-
-    <div id="updateForm" style="display:none;">
-        <h2>Modifier un produit phytosanitaire</h2>
-        <form method="post">
-            <input type="hidden" name="action" value="update">
-            <input type="hidden" name="id" id="update_id">
-
-            <table>
-                <tr>
-                    <td>Nom</td>
-                    <td>Unité d'emballage</td>
-                    <td>AMM</td>
-                </tr>
-                <tr>
-                    <td><input type="text" name="nom" id="update_nom" required></td>
-                    <td><input type="text" name="unite_emballage" id="update_unite_emballage" required></td>
-                    <td><input type="text" name="amm" id="update_amm" required></td>
-                </tr>
-            </table>
-            <input type="submit" value="Modifier">
+    <header>
+        <div class="logo-area">
+            <a href="index.php" style="display: flex; align-items: center; gap: 0.5rem; color: inherit;">
+                <img src="assets/logo.png" alt="AgriRec Logo">
+                <h2 style="margin:0; font-size: 1.25rem;">AgriRec</h2>
+            </a>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="index.php">Tableau de bord</a></li>
+                <li><a href="parcelles.php">Parcelles</a></li>
+                <li><a href="interventions_phyto.php">Nouvelle Intervention</a></li>
+            </ul>
+        </nav>
+        <form id="logout" action="logout.php" method="get">
+            <button class="danger">Déconnexion</button>
         </form>
+    </header>
+
+    <div class="container">
+        <div style="margin-bottom: 2rem;">
+            <h1>Produits Phytosanitaires</h1>
+            <p style="color: var(--text-muted);">Gérez votre catalogue de produits de protection des cultures.</p>
+        </div>
+
+        <section class="card">
+            <h3>Ajouter un produit</h3>
+            <form method="post">
+                <input type="hidden" name="action" value="create">
+                <div
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; width: 100%;">
+                    <div>
+                        <label style="display:block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.25rem;">Nom
+                            du produit</label>
+                        <input type="text" name="nom" placeholder="ex: RoundUp" required style="width:100%;">
+                    </div>
+                    <div>
+                        <label style="display:block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.25rem;">Unité
+                            d'emballage</label>
+                        <input type="text" name="unite_emballage" placeholder="ex: Litre" required style="width:100%;">
+                    </div>
+                    <div>
+                        <label style="display:block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.25rem;">N°
+                            AMM</label>
+                        <input type="text" name="amm" placeholder="ex: 2040523" required style="width:100%;">
+                    </div>
+                </div>
+                <div style="margin-top: 1.5rem; text-align: right; width: 100%;">
+                    <input type="submit" value="Enregistrer le produit">
+                </div>
+            </form>
+        </section>
+
+        <section>
+            <h3>Catalogue des produits</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nom</th>
+                            <th>Unité</th>
+                            <th>AMM</th>
+                            <th style="text-align: right;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php while ($produit = $produits->fetchArray(SQLITE3_ASSOC)): ?>
+                        <tr>
+                            <td style="font-weight: 600;">
+                                <?php echo htmlspecialchars_decode($produit["nom"]); ?>
+                            </td>
+                            <td style="color: var(--text-muted);">
+                                <?php echo htmlspecialchars($produit["unite_emballage"]); ?>
+                            </td>
+                            <td><code
+                                    style="background: #f1f3f5; padding: 0.2rem 0.5rem; border-radius: 4px;"><?php echo htmlspecialchars($produit["amm"]); ?></code>
+                            </td>
+                            <td style="text-align: right;">
+                                <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                                    <button class="secondary"
+                                        onclick="showUpdateForm(<?php echo htmlspecialchars(json_encode($produit)); ?>)">Modifier</button>
+                                    <form method="post" style="display:inline;">
+                                        <input type="hidden" name="action" value="delete">
+                                        <input type="hidden" name="id" value="<?php echo $produit[" id"]; ?>">
+                                        <button type="submit" class="danger"
+                                            onclick="return confirm('Supprimer ce produit ?');">Supprimer</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        <?php
+endwhile; ?>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Modal de modification -->
+        <div id="updateFormBackdrop"
+            style="display:none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+            <div class="card" style="width: 100%; max-width: 600px; margin: 2rem;">
+                <h3>Modifier le produit</h3>
+                <form method="post">
+                    <input type="hidden" name="action" value="update">
+                    <input type="hidden" name="id" id="update_id">
+
+                    <div style="width: 100%; margin-bottom: 1rem;">
+                        <label
+                            style="display:block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.25rem;">Nom</label>
+                        <input type="text" name="nom" id="update_nom" required style="width:100%;">
+                    </div>
+
+                    <div
+                        style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; width: 100%; margin-bottom: 1.5rem;">
+                        <div>
+                            <label
+                                style="display:block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.25rem;">Unité</label>
+                            <input type="text" name="unite_emballage" id="update_unite_emballage" required
+                                style="width:100%;">
+                        </div>
+                        <div>
+                            <label
+                                style="display:block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.25rem;">AMM</label>
+                            <input type="text" name="amm" id="update_amm" required style="width:100%;">
+                        </div>
+                    </div>
+
+                    <div style="display: flex; justify-content: flex-end; gap: 1rem; width: 100%;">
+                        <button type="button" class="secondary" onclick="hideUpdateForm()">Annuler</button>
+                        <input type="submit" value="Mettre à jour">
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 
     <script src="includes/functions.js"></script>
     <script>
-    function showUpdateForm(produit) {
-        document.getElementById('updateForm').style.display = 'block';
-        document.getElementById('update_id').value = produit.id;
-        document.getElementById('update_nom').value = htmlSpecialCharsDecode(produit.nom);
-        document.getElementById('update_unite_emballage').value = produit.unite_emballage;
-        document.getElementById('update_amm').value = produit.amm;
-    }
-    </script>
+        function showUpdateForm(produit) {
+            document.getElementById('updateFormBackdrop').style.display = 'flex';
+            document.getElementById('update_id').value = produit.id;
+            document.getElementById('update_nom').value = htmlSpecialCharsDecode(produit.nom);
+            document.getElementById('update_unite_emballage').value = produit.unite_emballage;
+            document.getElementById('update_amm').value = produit.amm;
+        }
 
+        function hideUpdateForm() {
+            document.getElementById('updateFormBackdrop').style.display = 'none';
+        }
+    </script>
 </body>
+
 </html>

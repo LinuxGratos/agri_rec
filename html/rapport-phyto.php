@@ -112,7 +112,8 @@ try {
         ];
     }
 
-} catch (Exception $e) {
+}
+catch (Exception $e) {
     die('Erreur : ' . $e->getMessage());
 }
 
@@ -143,100 +144,214 @@ $total_pages = ceil($total_interventions / $limit);
 
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Rapport des interventions phytosanitaires</title>
+    <title>Rapport Phyto - AgriRec</title>
     <link rel="stylesheet" href="includes/style.css" />
+    <style>
+        .report-header {
+            background: var(--primary-dark);
+            color: white;
+            padding: 1.5rem;
+            border-radius: var(--radius) var(--radius) 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .report-meta {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .badge {
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.2);
+        }
+    </style>
 </head>
+
 <body>
-    <h3>Navigation dans les pages de gestion</h3>
-    <ul>
-        <li><a href="interventions_phyto.php">Création des interventions phytosanitaires</a></li>
-        <li><a href="index.php">Retour à l'accueil</a></li>
-    </ul>
-    <h1>Rapport des interventions phytosanitaires</h1>
-    <h2><?php echo $entity; ?> - Telepac: <?php echo $telepac; ?></h2>
-    <br>
-    <!-- Formulaire de tri -->
-    <form method="get">
-        <select name="annee">
-            <option value="">Toutes les années</option>
-            <?php
-            $annees = $db->query("SELECT DISTINCT annee_culturale FROM interventions_phytosanitaires ORDER BY annee_culturale");
-            while ($annee = $annees->fetchArray(SQLITE3_ASSOC)) {
-                $selected = ($annee['annee_culturale'] == $annee_filter) ? 'selected' : '';
-                echo "<option value='" . htmlspecialchars($annee['annee_culturale']) . "' $selected>" . htmlspecialchars($annee['annee_culturale']) . "</option>";
-            }
-            ?>
-        </select>
-        <select name="parcelle">
-            <option value="">Toutes les parcelles</option>
-            <?php
-            $parcelles = $db->query("SELECT id, nom FROM parcelles ORDER BY nom");
-            while ($parcelle = $parcelles->fetchArray(SQLITE3_ASSOC)) {
-                $selected = ($parcelle['id'] == $parcelle_filter) ? 'selected' : '';
-                echo "<option value='" . htmlspecialchars($parcelle['id']) . "' $selected>" . htmlspecialchars_decode($parcelle['nom']) . "</option>";
-            }
-            ?>
-        </select>
-        <input type="submit" value="Filtrer">
-    </form>
+    <header>
+        <div class="logo-area">
+            <a href="index.php" style="display: flex; align-items: center; gap: 0.5rem; color: inherit;">
+                <img src="assets/logo.png" alt="AgriRec Logo">
+                <h2 style="margin:0; font-size: 1.25rem;">AgriRec</h2>
+            </a>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="index.php">Tableau de bord</a></li>
+                <li><a href="interventions_phyto.php">Saisir Intervention</a></li>
+            </ul>
+        </nav>
+        <form id="logout" action="logout.php" method="get">
+            <button class="danger">Déconnexion</button>
+        </form>
+    </header>
 
-    <!-- Affichage du tableau des interventions -->
-    <?php if (empty($interventions)) : ?>
-        <p>Aucune intervention trouvée pour les critères sélectionnés.</p>
-    <?php else : ?>
-        <?php foreach ($interventions as $intervention) : ?>
-            <table>
-                <thead>
-                    <tr>
-                        <th colspan="7">
-                            Année culturale: <?= htmlspecialchars($intervention['annee_culturale']) ?> |
-                            Parcelle : <?= htmlspecialchars_decode($intervention['parcelle_nom']) ?> <br/>
-                            Ilot : <?= htmlspecialchars($intervention['parcelle_ilot']) ?> <br/>
-                            Surface : <?= htmlspecialchars($intervention['surface']) ?> ha |
-                            Culture : <?= htmlspecialchars_decode($intervention['type_culture']) ?>
-                        </th>
-                    </tr>
-                    <tr>
-                        <th>Date</th>
-                        <th>Stade de la culture</th>
-                        <th>Produit</th>
-                        <th>AMM</th>
-                        <th>Volume total</th>
-                        <th>Volume par ha</th>
-                        <th>Cible visée</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($intervention['interventions'] as $detail) : ?>
+    <div class="container">
+        <div style="margin-bottom: 2rem;">
+            <h1>Registre Phytosanitaire</h1>
+            <p style="color: var(--text-muted);">Consultez le registre légal des traitements phytosanitaires.</p>
+        </div>
+
+        <section class="card" style="margin-bottom: 3rem;">
+            <h3 style="display: inline">Filtrer le registre</h3><a class="button" style="margin-left: 20px" href="rapport-phyto-brut.php?annee=<?php echo $annee_filter; ?>&parcelle=<?php echo $parcelle_filter; ?>" target="_blank">Imprimer le rapport</a>
+            <form method="get" style="display: flex; gap: 1rem; align-items: flex-end;">
+                <div style="flex:1;">
+                    <label style="display:block; font-size: 1rem; font-weight: 600; margin-bottom: 0.25rem;">Année
+                        Culturale</label>
+                    <select name="annee" style="width:100%;">
+                        <option value="">Toutes les années</option>
+                        <?php
+$annees = $db->query("SELECT DISTINCT annee_culturale FROM interventions_phytosanitaires ORDER BY annee_culturale");
+while ($annee = $annees->fetchArray(SQLITE3_ASSOC)) {
+    $selected = ($annee['annee_culturale'] == $annee_filter) ? 'selected' : '';
+    echo "<option value='" . htmlspecialchars($annee['annee_culturale']) . "' $selected>" . htmlspecialchars($annee['annee_culturale']) . "</option>";
+}
+?>
+                    </select>
+                </div>
+                <div style="flex:1;">
+                    <label
+                        style="display:block; font-size: 1rem; font-weight: 600; margin-bottom: 0.25rem;">Parcelle</label>
+                    <select name="parcelle" style="width:100%;">
+                        <option value="">Toutes les parcelles</option>
+                        <?php
+$parcelles = $db->query("SELECT id, nom FROM parcelles ORDER BY nom");
+while ($parcelle = $parcelles->fetchArray(SQLITE3_ASSOC)) {
+    $selected = ($parcelle['id'] == $parcelle_filter) ? 'selected' : '';
+    echo "<option value='" . htmlspecialchars($parcelle['id']) . "' $selected>" . htmlspecialchars_decode($parcelle['nom']) . "</option>";
+}
+?>
+                    </select>
+                </div>
+                <button type="submit">Appliquer les filtres</button>
+            </form>
+        </section>
+
+        <?php if (empty($interventions)): ?>
+        <div class="card" style="text-align: center; color: var(--text-muted);">
+            <p>Aucune intervention trouvée pour les critères sélectionnés.</p>
+        </div>
+        <?php
+else: ?>
+        <?php foreach ($interventions as $intervention): ?>
+        <div style="margin-bottom: 3rem; box-shadow: var(--shadow-md); border-radius: var(--radius); overflow: hidden;">
+            <div class="report-header">
+                <div>
+                    <h3 style="margin:0; color: white;">Parcelle :
+                        <?= htmlspecialchars_decode($intervention['parcelle_nom'])?>
+                    </h3>
+                    <div class="report-meta">
+                        <span>Ilot: <b>
+                                <?= htmlspecialchars($intervention['parcelle_ilot'])?>
+                            </b></span>
+                        <span>Surface: <b>
+                                <?= htmlspecialchars($intervention['surface'])?> ha
+                            </b></span>
+                        <span>Culture: <b>
+                                <?= htmlspecialchars_decode($intervention['type_culture'])?>
+                            </b></span>
+                    </div>
+                </div>
+                <div style="text-align: right;">
+                    <span class="badge">CAMPAGNE
+                        <?= htmlspecialchars($intervention['annee_culturale'])?>
+                    </span>
+                </div>
+            </div>
+            <div class="table-container" style="border-radius: 0; box-shadow: none; margin-bottom: 0;">
+                <table>
+                    <thead>
                         <tr>
-                            <td><?php if ($detail['date'] !== $last_date) { echo htmlspecialchars($detail['date']); $last_date = $detail['date'];}  ?></td>
-                            <td><?php if ($detail['stade'] !== $last_stade) { echo htmlspecialchars_decode($detail['stade']); $last_stade = $detail['stade'];}  ?></td>
-                            <td><?= htmlspecialchars_decode($detail['produit_nom']) ?></td>
-                            <td><?= htmlspecialchars($detail['produit_amm']) ?></td>
-                            <td><?= htmlspecialchars($detail['volume_total']) ?> <?= htmlspecialchars($detail['produit_unite']) ?></td>
-                            <td><?= htmlspecialchars($detail['volume_par_ha']) ?> <?= htmlspecialchars($detail['produit_unite']) ?></td>
-                            <td><?= htmlspecialchars_decode($detail['cible']) ?></td>
+                            <th>Date & Heure</th>
+                            <th>Stade</th>
+                            <th>Produit</th>
+                            <th>AMM</th>
+                            <th>Volume total</th>
+                            <th>Dose/ha</th>
+                            <th>Cible</th>
                         </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-            <div class="intervention-separator"></div>
-        <?php endforeach; ?>
-    <?php endif; ?>
+                    </thead>
+                    <tbody>
+                        <?php $last_date = ''; ?>
+                        <?php foreach ($intervention['interventions'] as $detail): ?>
+                        <tr>
+                            <td>
+                                <?php if ($detail['date'] !== $last_date) { ?>
+                                <span style="font-weight: 600;">
+                                    <?= htmlspecialchars($detail['date'])?>
+                                </span>
+                                <?php $last_date = $detail['date']; ?>
+                                <?php
+                                    } ?>
+                            </td>
+                            <td>
+                                <?php if ($detail['stade'] !== $last_stade) { ?>
+                                <span style="font-weight: 600;">
+                                    <?= htmlspecialchars($detail['stade'])?>
+                                </span>
+                                <?php $last_stade = $detail['stade']; ?>
+                                <?php
+                                    } ?>
+                            </td>
+                            <td style="font-weight: 500;">
+                                <?= htmlspecialchars_decode($detail['produit_nom'])?>
+                            </td>
+                            <td><code
+                                    style="background: #f1f3f5; padding: 0.2rem 0.4rem; border-radius: 4px; font-size: 0.8rem;"><?= htmlspecialchars($detail['produit_amm'])?></code>
+                            </td>
+                            <td>
+                                <?= htmlspecialchars($detail['volume_total'])?>
+                                <?= htmlspecialchars($detail['produit_unite'])?>
+                            </td>
+                            <td><span style="color: var(--primary-color); font-weight: 600;">
+                                    <?= htmlspecialchars($detail['volume_par_ha'])?>
+                                    <?= htmlspecialchars($detail['produit_unite'])?>/ha
+                                </span></td>
+                            <td style="color: var(--text-muted); font-size: 0.85rem;">
+                                <?= htmlspecialchars_decode($detail['cible'])?>
+                            </td>
+                        </tr>
+                        <?php
+        endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <?php
+    endforeach; ?>
+        <?php
+endif; ?>
 
-    <!-- Pagination -->
-    <div class="pagination">
-        <?php for ($i = 1; $i <= $total_pages; $i++) : ?>
-            <?php if ($i == $page) : ?>
-                <span class="current-page"><?= $i ?></span>
-            <?php else : ?>
-                <a href="?page=<?= $i ?><?= $annee_filter ? '&annee=' . urlencode($annee_filter) : '' ?><?= $parcelle_filter ? '&parcelle=' . urlencode($parcelle_filter) : '' ?>"><?= $i ?></a>
-            <?php endif; ?>
-        <?php endfor; ?>
+        <?php if ($total_pages > 1): ?>
+        <div style="display: flex; justify-content: center; gap: 0.5rem; margin-top: 2rem; margin-bottom: 4rem;">
+            <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+            <a href="?page=<?= $i?><?= $annee_filter ? '&annee=' . urlencode($annee_filter) : ''?><?= $parcelle_filter ? '&parcelle=' . urlencode($parcelle_filter) : ''?>"
+                style="padding: 0.5rem 1rem; border-radius: var(--radius); text-decoration: none; <?=($i == $page) ? 'background: var(--primary-color); color: white;' : 'background: white; color: var(--primary-color); border: 1px solid var(--primary-color);'?>">
+                <?= $i?>
+            </a>
+            <?php
+    endfor; ?>
+        </div>
+        <?php
+endif; ?>
     </div>
+</body>
+
+</html>
+
 
 </body>
+
 </html>
