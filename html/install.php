@@ -191,6 +191,13 @@ else: ?>
                 </div>
 
                 <div style="text-align: left; margin-bottom: 1.5rem;">
+                    <label style="display:block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.25rem;">Nom de
+                        société</label>
+                    <input type="text" name="entité" placeholder="EARL du terrier" required style="width:100%;">
+                </div>
+
+
+                <div style="text-align: left; margin-bottom: 1.5rem;">
                     <label style="display:block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.25rem;">N° de
                         compte Telepac</label>
                     <input type="text" name="telepac" placeholder="ex: 0123456" required style="width:100%;">

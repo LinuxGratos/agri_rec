@@ -138,7 +138,7 @@ $interventions = $db->query('SELECT ie.*, p.nom as parcelle_nom, e.nom as engrai
                             <?php
 $parcelles->reset();
 while ($parcelle = $parcelles->fetchArray(SQLITE3_ASSOC)): ?>
-                            <option value="<?php echo $parcelle[" id"]; ?>">
+                            <option value="<?php echo $parcelle["id"]; ?>">
                                 <?php echo htmlspecialchars_decode($parcelle["nom"]); ?> (<?php echo htmlspecialchars_decode($parcelle["surface"]); ?> ha)
                             </option>
                             <?php
@@ -154,7 +154,7 @@ endwhile; ?>
                             <?php
 $engrais->reset();
 while ($eng = $engrais->fetchArray(SQLITE3_ASSOC)): ?>
-                            <option value="<?php echo $eng[" id"]; ?>">
+                            <option value="<?php echo $eng["id"]; ?>">
                                 <?php echo htmlspecialchars_decode($eng["nom"]); ?>
                             </option>
                             <?php
@@ -239,7 +239,7 @@ while ($intervention = $interventions->fetchArray(SQLITE3_ASSOC)): ?>
                                         onclick='showUpdateForm(<?php echo json_encode($intervention); ?>)'>Modifier</button>
                                     <form method="post" style="display:inline;">
                                         <input type="hidden" name="action" value="delete">
-                                        <input type="hidden" name="id" value="<?php echo $intervention[" id"]; ?>">
+                                        <input type="hidden" name="id" value="<?php echo $intervention["id"]; ?>">
                                         <button type="submit" class="danger"
                                             onclick="return confirm('Supprimer cette intervention ?');">Supprimer</button>
                                     </form>
