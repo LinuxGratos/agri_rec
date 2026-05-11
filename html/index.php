@@ -30,8 +30,10 @@ if (!isset($_SESSION["user_id"])) {
 <body class="cute-background">
     <header>
         <div class="logo-area">
-            <img src="assets/logo.png" alt="AgriRec Logo">
-            <h2 style="margin:0; font-size: 1.25rem;">AgriRec - Tableau de bord</h2>
+            <a href="index.php" style="display: flex; align-items: center; gap: 0.5rem; color: inherit;">
+                <img src="assets/logo.png" alt="AgriRec Logo">
+                <h2 style="margin:0; font-size: 1.25rem;">AgriRec</h2>
+            </a>
         </div>
         <form id="logout" action="logout.php" method="get">
             <button class="danger">Déconnexion</button>
@@ -48,39 +50,39 @@ if (!isset($_SESSION["user_id"])) {
             </a>
 
             <a href="engrais.php" class="nav-card">
-                <h3>Gestion des engrais</h3>
+                <h3>Catalogue d'engrais</h3>
                 <p>Catalogue des fertilisants et intrants</p>
                 <div style="margin-top: 1rem; font-weight: 600;">Accéder &rarr;</div>
             </a>
 
             <a href="phytosanitaires.php" class="nav-card">
-                <h3>Gestion des phytosanitaires</h3>
+                <h3>Catalogue phytosanitaire</h3>
                 <p>Inventaire des traitements et protections</p>
                 <div style="margin-top: 1rem; font-weight: 600;">Accéder &rarr;</div>
             </a>
         </div>
         <div class="dashboard-grid">
             <a href="interventions_engrais.php" class="nav-card">
-                <h3>Application d'engrais</h3>
+                <h3>Intervention d'engrais</h3>
                 <p>Saisir les apports sur vos parcelles</p>
                 <div style="margin-top: 1rem; font-weight: 600;">Accéder &rarr;</div>
             </a>
 
             <a href="interventions_phyto.php" class="nav-card">
-                <h3>Application Phyto</h3>
+                <h3>Intervention phyto</h3>
                 <p>Saisir les traitements phytosanitaires</p>
                 <div style="margin-top: 1rem; font-weight: 600;">Accéder &rarr;</div>
             </a>
         </div>
         <div class="dashboard-grid">
             <a href="rapport-engrais.php" class="nav-card">
-                <h3>Rapports Engrais</h3>
+                <h3>Registre engrais</h3>
                 <p>Historique et bilans des fertilisations</p>
                 <div style="margin-top: 1rem; font-weight: 600;">Accéder &rarr;</div>
             </a>
 
             <a href="rapport-phyto.php" class="nav-card">
-                <h3>Rapports Phyto</h3>
+                <h3>Registre phyto</h3>
                 <p>Historique et bilans phytosanitaires</p>
                 <div style="margin-top: 1rem; font-weight: 600;">Accéder &rarr;</div>
             </a>

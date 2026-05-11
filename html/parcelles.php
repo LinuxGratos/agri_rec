@@ -155,25 +155,16 @@ $parcelles = $db->query("SELECT * FROM parcelles");
                             <th>Ilot</th>
                             <th>Surface (ha)</th>
                             <th>Culture</th>
-                            <th style="text-align: right;">Actions</th>
+                            <th style="text-align: center;">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php while ($parcelle = $parcelles->fetchArray(SQLITE3_ASSOC)): ?>
                         <tr>
-                            <td style="font-weight: 600;">
-                                <?php echo htmlspecialchars_decode($parcelle["nom"]); ?>
-                            </td>
-                            <td>
-                                <?php echo htmlspecialchars($parcelle["ilot"]); ?>
-                            </td>
-                            <td>
-                                <?php echo htmlspecialchars($parcelle["surface"]); ?> ha
-                            </td>
-                            <td><span
-                                    style="background: rgba(45, 106, 79, 0.1); color: var(--primary-dark); padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 500;">
-                                    <?php echo htmlspecialchars_decode($parcelle["culture"]); ?>
-                                </span></td>
+                            <td style="font-weight: 600;"><?php echo htmlspecialchars_decode($parcelle["nom"]); ?></td>
+                            <td><?php echo htmlspecialchars($parcelle["ilot"]); ?></td>
+                            <td><?php echo htmlspecialchars($parcelle["surface"]); ?> ha</td>
+                            <td><?php echo htmlspecialchars_decode($parcelle["culture"]); ?></td>
                             <td style="text-align: right;">
                                 <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
                                     <button class="secondary"

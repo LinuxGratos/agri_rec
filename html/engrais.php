@@ -87,7 +87,7 @@ $engrais = $db->query("SELECT * FROM engrais");
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestion des Engrais - AgriRec</title>
+    <title>Catalogue d'engrais - AgriRec</title>
     <link rel="stylesheet" href="includes/style.css">
 </head>
 
@@ -112,7 +112,7 @@ $engrais = $db->query("SELECT * FROM engrais");
 
     <div class="container">
         <div style="margin-bottom: 2rem;">
-            <h1>Gestion des engrais</h1>
+            <h1>Catalogue d'engrais</h1>
             <p style="color: var(--text-muted);">Configurez votre catalogue de fertilisants et précisez leurs
                 composants.</p>
         </div>
@@ -173,7 +173,7 @@ $engrais = $db->query("SELECT * FROM engrais");
                             <th>SO3</th>
                             <th>MgO</th>
                             <th>CaO</th>
-                            <th style="text-align: right;">Actions</th>
+                            <th style="text-align: center;">Actions</th>
                         </tr>
                     </thead>
                     <tbody>

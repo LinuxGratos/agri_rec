@@ -155,7 +155,7 @@ endwhile; ?>
 $engrais->reset();
 while ($eng = $engrais->fetchArray(SQLITE3_ASSOC)): ?>
                             <option value="<?php echo $eng["id"]; ?>">
-                                <?php echo htmlspecialchars_decode($eng["nom"]); ?>
+                                <?php echo htmlspecialchars_decode($eng["nom"]); ?> (<?php echo htmlspecialchars_decode($eng["unite"]); ?>)
                             </option>
                             <?php
 endwhile; ?>
@@ -209,7 +209,7 @@ endwhile; ?>
                             <th>Date</th>
                             <th>Engrais</th>
                             <th>Quantité</th>
-                            <th style="text-align: right;">Actions</th>
+                            <th style="text-align: center;">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -284,7 +284,7 @@ endwhile; ?>
 $engrais->reset();
 while ($eng = $engrais->fetchArray(SQLITE3_ASSOC)): ?>
                                 <option value="<?php echo $eng["id"]; ?>">
-                                    <?php echo htmlspecialchars_decode($eng["nom"]); ?>
+                                    <?php echo htmlspecialchars_decode($eng["nom"]); ?> (<?php echo htmlspecialchars_decode($eng["unite"]); ?>)
                                 </option>
                                 <?php
 endwhile; ?>
