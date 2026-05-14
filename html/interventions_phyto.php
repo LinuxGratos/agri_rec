@@ -104,7 +104,9 @@ $interventions = $db->query('SELECT ip.*, p.nom as parcelle_nom, p.surface, p.il
 $produits->reset();
 while ($produit = $produits->fetchArray(SQLITE3_ASSOC)):
 ?>
-                                <option value="<?php echo $produit['id']; ?>"><?php echo htmlspecialchars_decode($produit['nom']); ?></option>
+                                <option value="<?php echo $produit['id']; ?>"><?php echo htmlspecialchars_decode($produit['nom']); ?>
+                                <?php if ($produit['unite'] !== '') { ?> (<?php echo htmlspecialchars_decode($produit['unite_emballage']); ?>) <?php } ?>
+                                </option>
                             <?php
 endwhile; ?>
                         </select>
@@ -156,7 +158,7 @@ endwhile; ?>
 
         <section class="card">
             <h3>Saisir une nouvelle intervention</h3>
-            <form method="post">
+            <form style="display:block" method="post">
                 <input type="hidden" name="action" value="create">
 
                 <div
@@ -221,6 +223,7 @@ $produits->reset();
 while ($produit = $produits->fetchArray(SQLITE3_ASSOC)): ?>
                                     <option value="<?php echo $produit['id']; ?>">
                                         <?php echo htmlspecialchars_decode($produit['nom']); ?>
+                                        <?php if ($produit['unite'] !== '') { ?> (<?php echo htmlspecialchars_decode($produit['unite_emballage']); ?>) <?php } ?>
                                     </option>
                                     <?php
 endwhile; ?>
@@ -243,6 +246,8 @@ endwhile; ?>
                 <div style="margin-top: 1rem; display: flex; justify-content: space-between; align-items: center;">
                     <button type="button" class="secondary" onclick="addProduit()">+ Ajouter un autre produit à ce
                         mélange</button>
+                </div>
+                <div style="margin-top: 2rem;">
                     <input type="submit" value="Enregistrer l'intervention">
                 </div>
             </form>
@@ -259,7 +264,7 @@ endwhile; ?>
                             <th>Date / Heure</th>
                             <th>Stade</th>
                             <th>Détails des produits & doses</th>
-                            <th style="text-align: right;">Actions</th>
+                            <th style="text-align: center;">Actions</th>
                         </tr>
                     </thead>
                     <tbody>

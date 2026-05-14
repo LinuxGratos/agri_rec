@@ -77,7 +77,7 @@ $produits = $db->query("SELECT * FROM produits_phytosanitaires ORDER BY nom");
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Produits Phytosanitaires - AgriRec</title>
+    <title>Catalogue Phytosanitaires - AgriRec</title>
     <link rel="stylesheet" href="includes/style.css" />
 </head>
 
@@ -103,7 +103,7 @@ $produits = $db->query("SELECT * FROM produits_phytosanitaires ORDER BY nom");
 
     <div class="container">
         <div style="margin-bottom: 2rem;">
-            <h1>Produits Phytosanitaires</h1>
+            <h1>Catalogue Phytosanitaires</h1>
             <p style="color: var(--text-muted);">Gérez votre catalogue de produits de protection des cultures.</p>
         </div>
 
@@ -144,7 +144,7 @@ $produits = $db->query("SELECT * FROM produits_phytosanitaires ORDER BY nom");
                             <th>Nom</th>
                             <th>Unité</th>
                             <th>AMM</th>
-                            <th style="text-align: right;">Actions</th>
+                            <th style="text-align: center;">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -156,11 +156,9 @@ $produits = $db->query("SELECT * FROM produits_phytosanitaires ORDER BY nom");
                             <td style="color: var(--text-muted);">
                                 <?php echo htmlspecialchars($produit["unite_emballage"]); ?>
                             </td>
-                            <td><code
-                                    style="background: #f1f3f5; padding: 0.2rem 0.5rem; border-radius: 4px;"><?php echo htmlspecialchars($produit["amm"]); ?></code>
-                            </td>
-                            <td style="text-align: right;">
-                                <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                            <td><?php echo htmlspecialchars($produit["amm"]); ?></td>
+                            <td style="text-align: center;">
+                                <div>
                                     <button class="secondary"
                                         onclick="showUpdateForm(<?php echo htmlspecialchars(json_encode($produit)); ?>)">Modifier</button>
                                     <form method="post" style="display:inline;">

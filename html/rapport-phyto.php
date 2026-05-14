@@ -190,7 +190,7 @@ $total_pages = ceil($total_interventions / $limit);
         <nav>
             <ul>
                 <li><a href="index.php">Tableau de bord</a></li>
-                <li><a href="interventions_phyto.php">Saisir Intervention</a></li>
+                <li><a href="interventions_phyto.php">Saisir une intervention</a></li>
             </ul>
         </nav>
         <form id="logout" action="logout.php" method="get">
@@ -200,12 +200,13 @@ $total_pages = ceil($total_interventions / $limit);
 
     <div class="container">
         <div style="margin-bottom: 2rem;">
-            <h1>Registre Phytosanitaire</h1>
+            <h1>Registre phytosanitaire</h1>
             <p style="color: var(--text-muted);">Consultez le registre légal des traitements phytosanitaires.</p>
         </div>
 
         <section class="card" style="margin-bottom: 3rem;">
             <h3 style="display: inline">Filtrer le registre</h3><a class="button" style="margin-left: 20px" href="rapport-phyto-brut.php?annee=<?php echo $annee_filter; ?>&parcelle=<?php echo $parcelle_filter; ?>" target="_blank">Imprimer le rapport</a>
+            <div style="margin-top: 2rem;">
             <form method="get" style="display: flex; gap: 1rem; align-items: flex-end;">
                 <div style="flex:1;">
                     <label style="display:block; font-size: 1rem; font-weight: 600; margin-bottom: 0.25rem;">Année
@@ -237,6 +238,7 @@ while ($parcelle = $parcelles->fetchArray(SQLITE3_ASSOC)) {
                 </div>
                 <button type="submit">Appliquer les filtres</button>
             </form>
+            </div>
         </section>
 
         <?php if (empty($interventions)): ?>
@@ -308,9 +310,7 @@ else: ?>
                             <td style="font-weight: 500;">
                                 <?= htmlspecialchars_decode($detail['produit_nom'])?>
                             </td>
-                            <td><code
-                                    style="background: #f1f3f5; padding: 0.2rem 0.4rem; border-radius: 4px; font-size: 0.8rem;"><?= htmlspecialchars($detail['produit_amm'])?></code>
-                            </td>
+                            <td><?= htmlspecialchars($detail['produit_amm'])?></td>
                             <td>
                                 <?= htmlspecialchars($detail['volume_total'])?>
                                 <?= htmlspecialchars($detail['produit_unite'])?>

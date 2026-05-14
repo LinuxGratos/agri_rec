@@ -28,12 +28,12 @@ $query = "
         e.unite AS engrais_unite,
         ie.quantite,
         round((ie.quantite / p.surface), 2) AS quantite_par_ha,
-        round((ie.quantite * e.NO3 / p.surface), 2)  AS total_NO3,
-        round((ie.quantite * e.P2O5 / p.surface), 2) AS total_P2O5,
-        round((ie.quantite * e.K2O / p.surface), 2) AS total_K2O,
-        round((ie.quantite * e.SO3 / p.surface), 2) AS total_SO3,
-        round((ie.quantite * e.MgO / p.surface), 2) AS total_MgO,
-        round((ie.quantite * e.CaO / p.surface), 2) AS total_CaO,
+        round((ie.quantite * (e.NO3 / 100) / p.surface), 2)  AS total_NO3,
+        round((ie.quantite * (e.P2O5 / 100) / p.surface), 2) AS total_P2O5,
+        round((ie.quantite * (e.K2O / 100) / p.surface), 2) AS total_K2O,
+        round((ie.quantite * (e.SO3 / 100) / p.surface), 2) AS total_SO3,
+        round((ie.quantite * (e.MgO / 100) / p.surface), 2) AS total_MgO,
+        round((ie.quantite * (e.CaO / 100) / p.surface), 2) AS total_CaO,
         u.entity,
         u.telepac
     FROM 
@@ -83,7 +83,7 @@ while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Rapport Engrais - AgriRec</title>
+    <title>Registre Engrais - AgriRec</title>
     <link rel="stylesheet" href="includes/style.css" />
     <style>
         .report-header {
@@ -131,7 +131,7 @@ while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
         <nav>
             <ul>
                 <li><a href="index.php">Tableau de bord</a></li>
-                <li><a href="interventions_engrais.php">Saisir Intervention</a></li>
+                <li><a href="interventions_engrais.php">Saisir une intervention</a></li>
             </ul>
         </nav>
         <form id="logout" action="logout.php" method="get">
@@ -141,12 +141,13 @@ while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
 
     <div class="container">
         <div style="margin-bottom: 2rem;">
-            <h1>Rapport des interventions engrais</h1>
+            <h1>Registre engrais</h1>
             <p style="color: var(--text-muted);">Consultez les bilans de fertilisation par parcelle et campagne.</p>
         </div>
 
         <section class="card" style="margin-bottom: 3rem;">
             <h3 style="display: inline">Filtrer le rapport</h3><a class="button" style="margin-left: 20px" href="rapport-engrais-brut.php?annee=<?php echo $annee_filter; ?>&parcelle=<?php echo $parcelle_filter; ?>" target="_blank">Imprimer le rapport</a>
+            <div style="margin-top: 2rem;">
             <form method="get" style="display: flex; gap: 1rem; align-items: flex-end;">
                 <div style="flex:1;">
                     <label style="display:block; font-size: 1rem; font-weight: 600; margin-bottom: 0.25rem;">Année
@@ -178,6 +179,7 @@ while ($parcelle = $parcelles->fetchArray(SQLITE3_ASSOC)) {
                 </div>
                 <button type="submit">Appliquer les filtres</button>
             </form>
+            </div>
         </section>
 
         <?php if (empty($interventions)) { ?>
