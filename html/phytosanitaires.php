@@ -116,7 +116,7 @@ $produits = $db->query("SELECT * FROM produits_phytosanitaires ORDER BY nom");
                     <div>
                         <label style="display:block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.25rem;">Nom
                             du produit</label>
-                        <input type="text" name="nom" placeholder="ex: RoundUp" required style="width:100%;">
+                        <input type="text" name="nom" placeholder="ex: RoundUp" required style="width:100%;" autofocus>
                     </div>
                     <div>
                         <label style="display:block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.25rem;">Unité

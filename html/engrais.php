@@ -126,7 +126,7 @@ $engrais = $db->query("SELECT * FROM engrais");
                     <div>
                         <label
                             style="display:block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.25rem;">Nom</label>
-                        <input type="text" name="nom" placeholder="ex: Ammonitrate" required style="width:100%;">
+                        <input type="text" name="nom" placeholder="ex: Ammonitrate" required style="width:100%;" autofocus>
                     </div>
                     <div>
                         <label

@@ -193,7 +193,7 @@ else: ?>
                 <div style="text-align: left; margin-bottom: 1.5rem;">
                     <label style="display:block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.25rem;">Nom de
                         société</label>
-                    <input type="text" name="entité" placeholder="EARL du terrier" required style="width:100%;">
+                    <input type="text" name="entity" placeholder="EARL du terrier" required style="width:100%;">
                 </div>
 
 

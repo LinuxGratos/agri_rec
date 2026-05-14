@@ -133,7 +133,7 @@ $interventions = $db->query('SELECT ie.*, p.nom as parcelle_nom, e.nom as engrai
                     <div>
                         <label
                             style="display:block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.25rem;">Parcelle</label>
-                        <select name="parcelle_id" required style="width:100%;">
+                        <select name="parcelle_id" required style="width:100%;" autofocus>
                             <option value="" disabled selected>Choisir une parcelle</option>
                             <?php
 $parcelles->reset();

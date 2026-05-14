@@ -43,7 +43,7 @@ if (!isset($_SESSION["user_id"])) {
     <div class="container">
 
         <div class="dashboard-grid">
-            <a href="parcelles.php" class="nav-card">
+            <a autofocus href="parcelles.php" class="nav-card">
                 <h3>Gestion des parcelles</h3>
                 <p>Configurez et listez vos terrains</p>
                 <div style="margin-top: 1rem; font-weight: 600;">Accéder &rarr;</div>
