@@ -146,11 +146,11 @@ $total_pages = ceil($total_interventions / $limit);
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Rapport des interventions phytosanitaires</title>
+    <title>Registre des interventions phytosanitaires</title>
     <link rel="stylesheet" href="includes/style.brut.css" />
 </head>
 <body>
-    <h1>Rapport des interventions phytosanitaires</h1>
+    <h1>Registre des interventions phytosanitaires</h1>
     <h2><?php echo $entity; ?> - Telepac: <?php echo $telepac; ?></h2>
     <br>
     <!-- Formulaire de tri -->

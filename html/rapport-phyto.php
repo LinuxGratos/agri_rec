@@ -205,7 +205,7 @@ $total_pages = ceil($total_interventions / $limit);
         </div>
 
         <section class="card" style="margin-bottom: 3rem;">
-            <h3 style="display: inline">Filtrer le registre</h3><a class="button" style="margin-left: 20px" href="rapport-phyto-brut.php?annee=<?php echo $annee_filter; ?>&parcelle=<?php echo $parcelle_filter; ?>" target="_blank">Imprimer le rapport</a>
+            <h3 style="display: inline">Filtrer le registre</h3><a class="button" autofocus style="margin-left: 20px" href="rapport-phyto-brut.php?annee=<?php echo $annee_filter; ?>&parcelle=<?php echo $parcelle_filter; ?>" target="_blank">Imprimer le rapport</a>
             <div style="margin-top: 2rem;">
             <form method="get" style="display: flex; gap: 1rem; align-items: flex-end;">
                 <div style="flex:1;">

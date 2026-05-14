@@ -116,7 +116,7 @@ $parcelles = $db->query("SELECT * FROM parcelles");
                     <div>
                         <label style="display:block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.25rem;">Nom
                             de la parcelle</label>
-                        <input type="text" name="nom" placeholder="ex: La Grande Plaine" required style="width:100%;">
+                        <input type="text" name="nom" placeholder="ex: La Grande Plaine" required style="width:100%;" autofocus>
                     </div>
                     <div>
                         <label style="display:block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.25rem;">N°

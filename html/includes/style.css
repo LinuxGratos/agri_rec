@@ -7,6 +7,7 @@
     --accent-color: #ff8c00;
     --bg-color: #d2d2d2;
     --card-bg: #ffffff;
+    --card-bg-hover: #e6fef5;
     --text-main: #1b4332;
     --text-muted: #6b705c;
     --border-color: #e9ecef;
@@ -165,10 +166,6 @@ nav a {
     }
 }
 
-nav a:hover {
-    background: rgba(45, 106, 79, 0.05);
-}
-
 /* Tables */
 .table-container {
     background: var(--card-bg);
@@ -286,10 +283,21 @@ textarea {
     }
 }
 
+::selection,
+:checked {
+    outline: none;
+    background: var(--card-bg-hover);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(29, 216, 122, 0.5);
+    box-shadow: 0 0 0 6px rgba(29, 216, 122, 0.25);
+}
+
+a:focus,
 input:focus {
     outline: none;
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(45, 106, 79, 0.1);
+    box-shadow: 0 0 0 2px rgba(29, 216, 122, 0.5);
+    box-shadow: 0 0 0 6px rgba(29, 216, 122, 0.25);
 }
 
 a.button,
@@ -322,6 +330,9 @@ button:hover {
     background: var(--primary-dark);
     transform: translateY(-1px);
     box-shadow: var(--shadow-sm);
+
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(26, 71, 206, 0.531);
 }
 
 button.secondary {
@@ -451,7 +462,7 @@ button.danger:hover {
     box-shadow: var(--shadow-sm);
     text-align: center;
     transition: var(--transition);
-    border: 1px solid transparent;
+    /*border: 2px solid lightblue;*/
 }
 
 @media (max-width: 820px) {
@@ -461,9 +472,20 @@ button.danger:hover {
 }
 
 .nav-card:hover {
-    transform: translateY(-5px);
-    box-shadow: var(--shadow-md);
-    border-color: var(--primary-light);
+    background: var(--card-bg-hover);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-sm);
+    
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(29, 216, 122, 0.5);
+    box-shadow: 0 0 0 6px rgba(29, 216, 122, 0.25);
+}
+.nav-card:focus {
+    background: var(--card-bg-hover);
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(29, 216, 122, 0.5);
+    box-shadow: 0 0 0 6px rgba(29, 216, 122, 0.25);
 }
 
 @media (max-width: 820px) {
@@ -505,14 +527,7 @@ button.danger:hover {
 
 /* Action buttons container - responsive */
 @media (max-width: 820px) {
-    td:last-child {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-    
     td:last-child > div {
-        flex-direction: column;
         width: 100%;
     }
     
