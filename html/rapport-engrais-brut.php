@@ -28,12 +28,12 @@ $query = "
         e.unite AS engrais_unite,
         ie.quantite,
         round((ie.quantite / p.surface), 2) AS quantite_par_ha,
-        round((ie.quantite * e.NO3 / p.surface), 2)  AS total_NO3,
-        round((ie.quantite * e.P2O5 / p.surface), 2) AS total_P2O5,
-        round((ie.quantite * e.K2O / p.surface), 2) AS total_K2O,
-        round((ie.quantite * e.SO3 / p.surface), 2) AS total_SO3,
-        round((ie.quantite * e.MgO / p.surface), 2) AS total_MgO,
-        round((ie.quantite * e.CaO / p.surface), 2) AS total_CaO,
+        round((ie.quantite * (e.NO3 / 100) / p.surface), 2)  AS total_NO3,
+        round((ie.quantite * (e.P2O5 / 100) / p.surface), 2) AS total_P2O5,
+        round((ie.quantite * (e.K2O / 100) / p.surface), 2) AS total_K2O,
+        round((ie.quantite * (e.SO3 / 100) / p.surface), 2) AS total_SO3,
+        round((ie.quantite * (e.MgO / 100) / p.surface), 2) AS total_MgO,
+        round((ie.quantite * (e.CaO / 100) / p.surface), 2) AS total_CaO,
         u.entity,
         u.telepac
     FROM 
