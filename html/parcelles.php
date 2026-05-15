@@ -171,7 +171,7 @@ $parcelles = $db->query("SELECT * FROM parcelles");
                                         onclick="showUpdateForm(<?php echo htmlspecialchars(json_encode($parcelle)); ?>)">Modifier</button>
                                     <form method="post" style="display:inline;">
                                         <input type="hidden" name="action" value="delete">
-                                        <input type="hidden" name="id" value="<?php echo $parcelle[" id"]; ?>">
+                                        <input type="hidden" name="id" value="<?php echo $parcelle["id"]; ?>">
                                         <button type="submit" class="danger"
                                             onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette parcelle ?');">Supprimer</button>
                                     </form>
