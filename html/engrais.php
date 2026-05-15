@@ -209,7 +209,7 @@ $engrais = $db->query("SELECT * FROM engrais");
                                         onclick="showUpdateForm(<?php echo htmlspecialchars(json_encode($engrais_item)); ?>)">Modifier</button>
                                     <form method="post" style="display:inline;">
                                         <input type="hidden" name="action" value="delete">
-                                        <input type="hidden" name="id" value="<?php echo $engrais_item[" id"]; ?>">
+                                        <input type="hidden" name="id" value="<?php echo $engrais_item["id"]; ?>">
                                         <button type="submit" class="danger"
                                             onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet engrais ?');">Supprimer</button>
                                     </form>
