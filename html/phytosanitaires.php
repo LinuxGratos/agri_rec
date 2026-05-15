@@ -163,7 +163,7 @@ $produits = $db->query("SELECT * FROM produits_phytosanitaires ORDER BY nom");
                                         onclick="showUpdateForm(<?php echo htmlspecialchars(json_encode($produit)); ?>)">Modifier</button>
                                     <form method="post" style="display:inline;">
                                         <input type="hidden" name="action" value="delete">
-                                        <input type="hidden" name="id" value="<?php echo $produit[" id"]; ?>">
+                                        <input type="hidden" name="id" value="<?php echo $produit["id"]; ?>">
                                         <button type="submit" class="danger"
                                             onclick="return confirm('Supprimer ce produit ?');">Supprimer</button>
                                     </form>
