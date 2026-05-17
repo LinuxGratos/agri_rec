@@ -70,8 +70,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$parcelles = $db->query('SELECT * FROM parcelles');
-$produits = $db->query('SELECT * FROM produits_phytosanitaires');
+$parcelles = $db->query('SELECT * FROM parcelles ORDER BY nom');
+$produits = $db->query('SELECT * FROM produits_phytosanitaires ORDER BY nom');
 $interventions = $db->query('SELECT ip.*, p.nom as parcelle_nom, p.surface, p.ilot AS parcelle_ilot
                              FROM interventions_phytosanitaires ip
                              JOIN parcelles p ON ip.parcelle_id = p.id
