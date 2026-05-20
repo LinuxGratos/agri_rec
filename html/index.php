@@ -86,6 +86,11 @@ if (!isset($_SESSION["user_id"])) {
                 <p>Historique et bilans phytosanitaires</p>
                 <div style="margin-top: 1rem; font-weight: 600;">Accéder &rarr;</div>
             </a>
+            <a href="stock-phyto.php" class="nav-card">
+                <h3>Stock phyto</h3>
+                <p>Utilisation des stocks phytosanitaires</p>
+                <div style="margin-top: 1rem; font-weight: 600;">Accéder &rarr;</div>
+            </a>
         </div>
     </div>
 </body>
