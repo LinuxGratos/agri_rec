@@ -78,7 +78,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 }
 
-$engrais = $db->query("SELECT * FROM engrais");
+$engrais = $db->query("SELECT * FROM engrais ORDER BY nom");
 ?>
 
 <!DOCTYPE html>

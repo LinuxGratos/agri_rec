@@ -76,9 +76,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 }
 
-$parcelles = $db->query("SELECT * FROM parcelles");
+$parcelles = $db->query("SELECT * FROM parcelles ORDER BY nom");
 
-$engrais = $db->query("SELECT * FROM engrais");
+$engrais = $db->query("SELECT * FROM engrais ORDER BY nom");
 
 $interventions = $db->query('SELECT ie.*, p.nom as parcelle_nom, e.nom as engrais_nom, e.unite as engrais_unite
                              FROM interventions_engrais ie
