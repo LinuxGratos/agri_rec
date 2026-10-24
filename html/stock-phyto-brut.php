@@ -23,12 +23,13 @@ $query = "
         details_interventions_phytosanitaires dip ON ip.id = dip.intervention_id
     JOIN
         produits_phytosanitaires pp ON dip.produit_id = pp.id
+    WHERE ip.annule_le IS NULL
 	
 ";
 
 $params = [];
 if ($annee_filter) {
-    $query .= " WHERE ip.annee_culturale = :annee_culturale";
+    $query .= " AND ip.annee_culturale = :annee_culturale";
     $params[':annee_culturale'] = $annee_filter;
 }
 

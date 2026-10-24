@@ -11,6 +11,7 @@
 function etapes_migration() {
     return [
         1 => 'migration_1_texte_brut',
+        2 => 'migration_2_registre_2026',
     ];
 }
 
@@ -42,6 +43,84 @@ function migration_1_texte_brut($db) {
             }
         }
     }
+}
+
+// Version 2 : informations du registre exigées depuis le 1er janvier 2026
+// (arrêté du 24 décembre 2025 relatif à la tenue des registres phytosanitaires).
+// Les interventions gardent une copie de la culture, de l'îlot, de la surface
+// et du produit au moment du traitement : modifier une parcelle ou le
+// catalogue ne change plus le passé.
+function migration_2_registre_2026($db) {
+    // Exploitation : ajout du SIRET, et n° PACAGE en texte pour garder le 0 initial
+    $db->exec("CREATE TABLE users_v2 (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT UNIQUE NOT NULL,
+        entity TEXT NOT NULL,
+        siret TEXT NOT NULL DEFAULT '',
+        telepac TEXT NOT NULL,
+        password TEXT NOT NULL
+    )");
+    $db->exec("INSERT INTO users_v2 (id, username, entity, telepac, password)
+               SELECT id, username, entity, CAST(telepac AS TEXT), password FROM users");
+    $db->exec("DROP TABLE users");
+    $db->exec("ALTER TABLE users_v2 RENAME TO users");
+
+    // Parcelles : coordonnées GPS facultatives (si pas d'îlot PAC)
+    $db->exec("ALTER TABLE parcelles ADD COLUMN latitude REAL");
+    $db->exec("ALTER TABLE parcelles ADD COLUMN longitude REAL");
+
+    // Catalogue phyto : produit ou adjuvant, délai de rentrée (heures), bio
+    $db->exec("ALTER TABLE produits_phytosanitaires ADD COLUMN type TEXT NOT NULL DEFAULT 'produit'");
+    $db->exec("ALTER TABLE produits_phytosanitaires ADD COLUMN delai_rentree INTEGER");
+    $db->exec("ALTER TABLE produits_phytosanitaires ADD COLUMN bio INTEGER NOT NULL DEFAULT 0");
+
+    // Interventions phyto
+    $db->exec("ALTER TABLE interventions_phytosanitaires ADD COLUMN heure_fin TEXT");
+    $db->exec("ALTER TABLE interventions_phytosanitaires ADD COLUMN stade_bbch TEXT");
+    $db->exec("ALTER TABLE interventions_phytosanitaires ADD COLUMN culture TEXT");
+    $db->exec("ALTER TABLE interventions_phytosanitaires ADD COLUMN ilot TEXT");
+    $db->exec("ALTER TABLE interventions_phytosanitaires ADD COLUMN surface_traitee REAL");
+    $db->exec("ALTER TABLE interventions_phytosanitaires ADD COLUMN realise_par TEXT NOT NULL DEFAULT 'exploitation'");
+    $db->exec("ALTER TABLE interventions_phytosanitaires ADD COLUMN intervenant_nom TEXT");
+    $db->exec("ALTER TABLE interventions_phytosanitaires ADD COLUMN intervenant_siret TEXT");
+    $db->exec("ALTER TABLE interventions_phytosanitaires ADD COLUMN saisi_le TEXT");
+    $db->exec("ALTER TABLE interventions_phytosanitaires ADD COLUMN annule_le TEXT");
+    $db->exec("ALTER TABLE interventions_phytosanitaires ADD COLUMN motif_annulation TEXT");
+    $db->exec("UPDATE interventions_phytosanitaires SET
+        culture = (SELECT culture FROM parcelles WHERE parcelles.id = parcelle_id),
+        ilot = (SELECT ilot FROM parcelles WHERE parcelles.id = parcelle_id),
+        surface_traitee = (SELECT surface FROM parcelles WHERE parcelles.id = parcelle_id)");
+
+    // Produits de chaque intervention : copie des informations du catalogue
+    $db->exec("ALTER TABLE details_interventions_phytosanitaires ADD COLUMN produit_nom TEXT");
+    $db->exec("ALTER TABLE details_interventions_phytosanitaires ADD COLUMN amm TEXT");
+    $db->exec("ALTER TABLE details_interventions_phytosanitaires ADD COLUMN unite TEXT");
+    $db->exec("ALTER TABLE details_interventions_phytosanitaires ADD COLUMN type TEXT NOT NULL DEFAULT 'produit'");
+    $db->exec("ALTER TABLE details_interventions_phytosanitaires ADD COLUMN delai_rentree INTEGER");
+    $db->exec("ALTER TABLE details_interventions_phytosanitaires ADD COLUMN bio INTEGER NOT NULL DEFAULT 0");
+    $db->exec("UPDATE details_interventions_phytosanitaires SET
+        produit_nom = (SELECT nom FROM produits_phytosanitaires p WHERE p.id = produit_id),
+        amm = (SELECT amm FROM produits_phytosanitaires p WHERE p.id = produit_id),
+        unite = (SELECT unite_emballage FROM produits_phytosanitaires p WHERE p.id = produit_id)");
+
+    // Semis de semences traitées (traitement fait hors de l'exploitation)
+    $db->exec("CREATE TABLE semis_semences_traitees (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        parcelle_id INTEGER NOT NULL,
+        annee_culturale INTEGER NOT NULL,
+        date DATE NOT NULL,
+        culture TEXT NOT NULL,
+        ilot TEXT,
+        surface REAL NOT NULL,
+        produit_nom TEXT NOT NULL,
+        amm TEXT NOT NULL,
+        quantite_semences REAL,
+        unite_semences TEXT,
+        saisi_le TEXT,
+        annule_le TEXT,
+        motif_annulation TEXT,
+        FOREIGN KEY (parcelle_id) REFERENCES parcelles(id)
+    )");
 }
 
 // Applique les étapes manquantes. Appelée par getDB().

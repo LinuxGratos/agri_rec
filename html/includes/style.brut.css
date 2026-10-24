@@ -62,3 +62,17 @@ tbody tr:nth-child(even) {
   background-color: #3f87a6;
   color: #fff;
 }
+/* Registre : le texte n'est jamais coupé, impression en paysage */
+table.registre td {
+  white-space: normal;
+}
+
+@page {
+  size: landscape;
+}
+
+@media print {
+  form {
+    display: none;
+  }
+}
