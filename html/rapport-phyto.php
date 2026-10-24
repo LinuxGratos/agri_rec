@@ -12,6 +12,10 @@ $parcelle_filter = isset($_GET['parcelle']) && ctype_digit($_GET['parcelle']) ? 
 $exploitation = exploitation($db);
 $groupes = registre_par_parcelle(lignes_registre_phyto($db, $annee_filter, $parcelle_filter));
 $semis = semis_traites($db, $annee_filter, $parcelle_filter);
+
+// Contrôle de tout le registre de la campagne (sans filtre de parcelle), comme l'export
+$problemes = controles_registre($exploitation, lignes_registre_phyto($db, $annee_filter), semis_traites($db, $annee_filter));
+$lien_annee = $annee_filter ? '&annee=' . urlencode($annee_filter) : '';
 ?>
 
 <!DOCTYPE html>
@@ -92,6 +96,29 @@ while ($parcelle = $parcelles->fetchArray(SQLITE3_ASSOC)) {
                 <button type="submit">Appliquer les filtres</button>
             </form>
             </div>
+        </section>
+
+        <section class="card" style="margin-bottom: 3rem;">
+            <h3>Format électronique</h3>
+            <p style="color: var(--text-muted);">À partir du 1er janvier 2027, le registre doit être tenu dans un format
+                électronique lisible par machine. Ces fichiers contiennent tout le registre<?= $annee_filter ? ' de la campagne ' . echapper($annee_filter) : '' ?>.</p>
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                <a class="button" href="export-registre.php?format=csv&contenu=traitements<?= $lien_annee ?>">Traitements (CSV)</a>
+                <a class="button" href="export-registre.php?format=csv&contenu=semis<?= $lien_annee ?>">Semis de semences traitées (CSV)</a>
+                <a class="button" href="export-registre.php?format=json<?= $lien_annee ?>">Registre complet (JSON)</a>
+            </div>
+            <?php if ($problemes): ?>
+            <div class="message-info" style="margin-top: 1.5rem;">
+                <b>Points à compléter avant export :</b>
+                <ul>
+                    <?php foreach ($problemes as $probleme): ?>
+                    <li><?= echapper($probleme) ?></li>
+                    <?php endforeach; ?>
+                </ul>
+            </div>
+            <?php else: ?>
+            <p style="margin-top: 1rem;">✔ Toutes les informations obligatoires sont renseignées.</p>
+            <?php endif; ?>
         </section>
 
         <?php if (empty($groupes)): ?>

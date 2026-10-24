@@ -42,6 +42,19 @@ Chaque intervention garde une copie des informations du moment (culture, îlot, 
 modifier une parcelle ou le catalogue ne change pas le registre. Une intervention n'est jamais effacée :
 elle est annulée avec un motif et reste visible, barrée, dans l'historique.
 
+### Format électronique (obligatoire à partir du 1er janvier 2027)
+
+Depuis la page **Registre phyto**, trois boutons téléchargent le registre dans un format lisible par machine :
+
+- **Traitements (CSV)** : une ligne par produit utilisé ;
+- **Semis de semences traitées (CSV)** ;
+- **Registre complet (JSON)** : tout le registre et l'identification de l'exploitation dans un seul fichier.
+
+Les fichiers CSV utilisent le point-virgule comme séparateur, le point pour les décimales et l'encodage UTF-8.
+Les dates sont au format AAAA-MM-JJ. La même page liste les informations obligatoires qui manquent encore.
+Pensez à télécharger ces fichiers chaque année (au plus tard le 31 janvier pour l'année écoulée)
+et à les conserver au moins 5 ans.
+
 ### Utilisation
 
 Le couple utilisateur /mot de passe est à créer à la première connexion.
