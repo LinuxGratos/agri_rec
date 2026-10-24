@@ -1,5 +1,6 @@
 <?php
 require_once 'includes/securite.php';
+require_once 'includes/registre.php';
 exiger_connexion();
 
 $db = getDB();
@@ -7,88 +8,8 @@ $db = getDB();
 // Validation stricte des entrées utilisateur
 $annee_filter = isset($_GET['annee']) && ctype_digit($_GET['annee']) ? $_GET['annee'] : null;
 
-// Requête SQL avec filtres et pagination
-$query = "
-    SELECT
-        ip.annee_culturale,
-        pp.nom AS produit_nom,
-        pp.unite_emballage AS produit_unite,
-        pp.amm AS produit_amm,
-        SUM(dip.volume_total) AS volume_total,
-        u.entity,
-        u.telepac
-    FROM
-        interventions_phytosanitaires ip, users u
-    JOIN
-        details_interventions_phytosanitaires dip ON ip.id = dip.intervention_id
-    JOIN
-        produits_phytosanitaires pp ON dip.produit_id = pp.id
-    WHERE ip.annule_le IS NULL
-	
-";
-
-$params = [];
-if ($annee_filter) {
-    $query .= " AND ip.annee_culturale = :annee_culturale";
-    $params[':annee_culturale'] = $annee_filter;
-}
-
-$query .= " GROUP BY ip.annee_culturale, pp.nom
-            ORDER BY ip.annee_culturale, pp.nom";
-
-try {
-    $stmt = $db->prepare($query);
-    if (!$stmt) {
-        throw new Exception($db->lastErrorMsg());
-    }
-
-    foreach ($params as $key => $value) {
-        $stmt->bindValue($key, $value, is_int($value) ? SQLITE3_INTEGER : SQLITE3_TEXT);
-    }
-
-    $result = $stmt->execute();
-    if (!$result) {
-        throw new Exception($db->lastErrorMsg());
-    }
-
-    // Stocker les interventions groupées
-    $interventions = [];
-
-    while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
-        $key = $row['annee_culturale'];
-
-        $entity = $row['entity'];
-        $telepac = $row['telepac'];
-
-        if (!isset($interventions[$key])) {
-            $interventions[$key] = [
-                'annee_culturale' => $row['annee_culturale'],
-                'parcelle_id' => $row['parcelle_id'],
-                'parcelle_nom' => $row['parcelle_nom'],
-                'parcelle_ilot' => $row['parcelle_ilot'],
-                'surface' => $row['surface'],
-                'type_culture' => $row['type_culture'],
-                'interventions' => []
-            ];
-        }
-
-        $interventions[$key]['interventions'][] = [
-            'date' => $row['date'],
-            'stade' => $row['stade'],
-            'produit_nom' => $row['produit_nom'],
-            'produit_unite' => $row['produit_unite'],
-            'produit_amm' => $row['produit_amm'],
-            'volume_total' => $row['volume_total'],
-            'volume_par_ha' => $row['volume_par_ha'],
-            'cible' => $row['cible']
-        ];
-    }
-
-}
-catch (Exception $e) {
-    die('Erreur : ' . $e->getMessage());
-}
-
+$exploitation = exploitation($db);
+$stock = stock_par_annee($db, $annee_filter);
 ?>
 
 <!DOCTYPE html>
@@ -184,17 +105,17 @@ catch (Exception $e) {
 
         </section>
 
-        <?php if (empty($interventions)): ?>
+        <?php if (empty($stock)): ?>
         <div class="card" style="text-align: center; color: var(--text-muted);">
-            <p>Aucune intervention trouvée pour les critères sélectionnés.</p>
+            <p>Aucun produit utilisé pour les critères sélectionnés.</p>
         </div>
         <?php
 else: ?>
-        <?php foreach ($interventions as $intervention): ?>
+        <?php foreach ($stock as $annee_stock => $produits): ?>
         <div style="margin-bottom: 3rem; box-shadow: var(--shadow-md); border-radius: var(--radius); overflow: hidden;">
             <div class="report-header">
                 <div>
-                    <h3 style="margin:0; color: white;">Année : <?= echapper($intervention['annee_culturale'])?>
+                    <h3 style="margin:0; color: white;">Année : <?= echapper($annee_stock)?>
                     </h3>
                 </div>
             </div>
@@ -208,16 +129,15 @@ else: ?>
                         </tr>
                     </thead>
                     <tbody>
-                        <?php $last_date = ''; ?>
-                        <?php foreach ($intervention['interventions'] as $detail): ?>
+                        <?php foreach ($produits as $detail): ?>
                         <tr>
                             <td style="font-weight: 500;">
                                 <?= echapper($detail['produit_nom'])?>
                             </td>
-                            <td><?= echapper($detail['produit_amm'])?></td>
+                            <td><?= echapper($detail['amm'])?></td>
                             <td>
-                                <?= echapper($detail['volume_total'])?>
-                                <?= echapper($detail['produit_unite'])?>
+                                <?= echapper($detail['quantite'])?>
+                                <?= echapper($detail['unite'])?>
                             </td>
                         </tr>
                         <?php
@@ -231,24 +151,7 @@ else: ?>
         <?php
 endif; ?>
 
-        <?php if ($total_pages > 1): ?>
-        <div style="display: flex; justify-content: center; gap: 0.5rem; margin-top: 2rem; margin-bottom: 4rem;">
-            <?php for ($i = 1; $i <= $total_pages; $i++): ?>
-            <a href="?page=<?= $i?><?= $annee_filter ? '&annee=' . urlencode($annee_filter) : ''?><?= $parcelle_filter ? '&parcelle=' . urlencode($parcelle_filter) : ''?>"
-                style="padding: 0.5rem 1rem; border-radius: var(--radius); text-decoration: none; <?=($i == $page) ? 'background: var(--primary-color); color: white;' : 'background: white; color: var(--primary-color); border: 1px solid var(--primary-color);'?>">
-                <?= $i?>
-            </a>
-            <?php
-    endfor; ?>
-        </div>
-        <?php
-endif; ?>
     </div>
-</body>
-
-</html>
-
-
 </body>
 
 </html>

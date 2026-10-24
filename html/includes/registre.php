@@ -45,7 +45,7 @@ function lignes_registre_phyto($db, $annee = null, $parcelle = null) {
                    SUBSTR(ip.date, 1, 10) AS date, SUBSTR(ip.date, 12, 5) AS heure_debut, ip.heure_fin,
                    ip.stade_bbch, ip.stade, ip.realise_par, ip.intervenant_nom, ip.intervenant_siret,
                    dip.produit_nom, dip.amm, dip.type, dip.bio, dip.delai_rentree,
-                   dip.volume_total AS quantite, dip.unite, dip.cible
+                   dip.volume_total AS quantite, dip.unite, dip.cible, ip.saisi_le
             FROM interventions_phytosanitaires ip
             JOIN parcelles p ON p.id = ip.parcelle_id
             JOIN details_interventions_phytosanitaires dip ON dip.intervention_id = ip.id
@@ -94,6 +94,137 @@ function registre_par_parcelle($lignes) {
         $groupes[$cle]['lignes'][] = $ligne;
     }
     return $groupes;
+}
+
+// Colonnes du fichier exporté (CSV et JSON) => champ correspondant du registre.
+// Pour ajouter une colonne à l'export, il suffit d'ajouter une ligne ici.
+function colonnes_export_traitements() {
+    return [
+        'siret_exploitation' => 'siret_exploitation',
+        'pacage' => 'pacage',
+        'id_intervention' => 'intervention_id',
+        'campagne' => 'annee_culturale',
+        'date' => 'date',
+        'heure_debut' => 'heure_debut',
+        'heure_fin' => 'heure_fin',
+        'parcelle' => 'parcelle_nom',
+        'ilot_pac' => 'ilot',
+        'latitude' => 'latitude',
+        'longitude' => 'longitude',
+        'culture' => 'culture',
+        'surface_traitee_ha' => 'surface_traitee',
+        'stade_bbch' => 'stade_bbch',
+        'stade' => 'stade',
+        'nom_commercial' => 'produit_nom',
+        'numero_amm' => 'amm',
+        'type' => 'type',
+        'utilisable_ab' => 'utilisable_ab',
+        'quantite' => 'quantite',
+        'unite' => 'unite',
+        'dose_par_ha' => 'dose_par_ha',
+        'unite_dose' => 'unite_dose',
+        'cible' => 'cible',
+        'delai_rentree_heures' => 'delai_rentree',
+        'realise_par' => 'realise_par',
+        'intervenant_nom' => 'intervenant_nom',
+        'intervenant_siret' => 'intervenant_siret',
+        'saisi_le' => 'saisi_le',
+    ];
+}
+
+function colonnes_export_semis() {
+    return [
+        'siret_exploitation' => 'siret_exploitation',
+        'pacage' => 'pacage',
+        'id_semis' => 'id',
+        'campagne' => 'annee_culturale',
+        'date' => 'date',
+        'parcelle' => 'parcelle_nom',
+        'ilot_pac' => 'ilot',
+        'culture' => 'culture',
+        'surface_ha' => 'surface',
+        'produit_traitement_semences' => 'produit_nom',
+        'numero_amm' => 'amm',
+        'quantite_semences' => 'quantite_semences',
+        'unite_semences' => 'unite_semences',
+        'saisi_le' => 'saisi_le',
+    ];
+}
+
+// Met des lignes du registre au format d'export, selon la liste de colonnes choisie
+function preparer_export($exploitation, $lignes, $colonnes) {
+    $export = [];
+    foreach ($lignes as $ligne) {
+        $ligne['siret_exploitation'] = $exploitation['siret'];
+        $ligne['pacage'] = $exploitation['telepac'];
+        $ligne['utilisable_ab'] = !empty($ligne['bio']) ? 'oui' : 'non';
+        $ligne['unite_dose'] = isset($ligne['unite']) ? $ligne['unite'] . '/ha' : '';
+
+        $sortie = [];
+        foreach ($colonnes as $colonne => $champ) {
+            $sortie[$colonne] = $ligne[$champ] ?? null;
+        }
+        $export[] = $sortie;
+    }
+    return $export;
+}
+
+// Contrôle des informations obligatoires avant export.
+// Renvoie la liste des points à corriger (vide si tout est complet).
+function controles_registre($exploitation, $lignes, $semis) {
+    $problemes = [];
+    if (!siret_valide($exploitation['siret'])) {
+        $problemes[] = "Le SIRET de l'exploitation est manquant ou invalide (page Exploitation).";
+    }
+    if (trim($exploitation['telepac']) === '') {
+        $problemes[] = "Le n° PACAGE de l'exploitation est manquant (page Exploitation).";
+    }
+    foreach ($lignes as $l) {
+        $quoi = 'Traitement du ' . date('d/m/Y', strtotime($l['date'])) . ' sur ' . $l['parcelle_nom'] . ' (' . $l['produit_nom'] . ')';
+        if (!amm_valide((string) $l['amm'])) {
+            $problemes[] = "$quoi : n° d'AMM « " . $l['amm'] . " » invalide (7 chiffres attendus).";
+        }
+        if (trim((string) $l['culture']) === '') {
+            $problemes[] = "$quoi : culture manquante.";
+        }
+        if (!($l['surface_traitee'] > 0)) {
+            $problemes[] = "$quoi : surface traitée manquante.";
+        }
+        if (trim((string) $l['ilot']) === '' && $l['latitude'] === null) {
+            $problemes[] = "$quoi : ni îlot PAC ni coordonnées GPS pour la parcelle.";
+        }
+    }
+    foreach ($semis as $s) {
+        if (!amm_valide((string) $s['amm'])) {
+            $problemes[] = 'Semis du ' . date('d/m/Y', strtotime($s['date'])) . ' sur ' . $s['parcelle_nom'] . " : n° d'AMM invalide.";
+        }
+    }
+    return $problemes;
+}
+
+// Quantités totales utilisées par produit et par campagne (interventions annulées exclues)
+function stock_par_annee($db, $annee = null) {
+    $sql = "SELECT ip.annee_culturale, dip.produit_nom, dip.amm, dip.unite, SUM(dip.volume_total) AS quantite
+            FROM details_interventions_phytosanitaires dip
+            JOIN interventions_phytosanitaires ip ON ip.id = dip.intervention_id
+            WHERE ip.annule_le IS NULL";
+    if ($annee) {
+        $sql .= " AND ip.annee_culturale = :annee";
+    }
+    $sql .= " GROUP BY ip.annee_culturale, dip.produit_nom, dip.amm, dip.unite
+              ORDER BY ip.annee_culturale, dip.produit_nom";
+
+    $stmt = $db->prepare($sql);
+    if ($annee) {
+        $stmt->bindValue(':annee', intval($annee), SQLITE3_INTEGER);
+    }
+    $resultat = $stmt->execute();
+
+    $annees = [];
+    while ($ligne = $resultat->fetchArray(SQLITE3_ASSOC)) {
+        $annees[$ligne['annee_culturale']][] = $ligne;
+    }
+    return $annees;
 }
 
 // Semis de semences traitées, annulations exclues
