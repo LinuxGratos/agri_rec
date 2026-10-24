@@ -1,11 +1,6 @@
 <?php
-session_start();
-require_once 'includes/db.php';
-
-if (!isset($_SESSION['user_id'])) {
-    header('Location: login.php');
-    exit;
-}
+require_once 'includes/securite.php';
+exiger_connexion();
 
 $db = getDB();
 
@@ -134,7 +129,8 @@ while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
                 <li><a href="interventions_engrais.php">Saisir une intervention</a></li>
             </ul>
         </nav>
-        <form id="logout" action="logout.php" method="get">
+        <form id="logout" action="logout.php" method="post">
+            <?= champ_csrf() ?>
             <button class="danger">Déconnexion</button>
         </form>
     </header>
@@ -146,7 +142,7 @@ while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
         </div>
 
         <section class="card" style="margin-bottom: 3rem;">
-            <h3 style="display: inline">Filtrer le rapport</h3><a class="button" autofocus style="margin-left: 20px" href="rapport-engrais-brut.php?annee=<?php echo $annee_filter; ?>&parcelle=<?php echo $parcelle_filter; ?>" target="_blank">Imprimer le rapport</a>
+            <h3 style="display: inline">Filtrer le rapport</h3><a class="button" autofocus style="margin-left: 20px" href="rapport-engrais-brut.php?annee=<?php echo urlencode((string) $annee_filter); ?>&parcelle=<?php echo urlencode((string) $parcelle_filter); ?>" target="_blank">Imprimer le rapport</a>
             <div style="margin-top: 2rem;">
             <form method="get" style="display: flex; gap: 1rem; align-items: flex-end;">
                 <div style="flex:1;">
@@ -158,7 +154,7 @@ while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
 $annees = $db->query("SELECT DISTINCT annee_culturale FROM interventions_engrais ORDER BY annee_culturale");
 while ($annee = $annees->fetchArray(SQLITE3_ASSOC)) {
     $selected = ($annee['annee_culturale'] == $annee_filter) ? 'selected' : '';
-    echo "<option value='" . htmlspecialchars($annee['annee_culturale']) . "' $selected>" . htmlspecialchars($annee['annee_culturale']) . "</option>";
+    echo "<option value='" . echapper($annee['annee_culturale']) . "' $selected>" . echapper($annee['annee_culturale']) . "</option>";
 }
 ?>
                     </select>
@@ -172,7 +168,7 @@ while ($annee = $annees->fetchArray(SQLITE3_ASSOC)) {
 $parcelles = $db->query("SELECT id, nom FROM parcelles ORDER BY nom");
 while ($parcelle = $parcelles->fetchArray(SQLITE3_ASSOC)) {
     $selected = ($parcelle['id'] == $parcelle_filter) ? 'selected' : '';
-    echo "<option value='" . htmlspecialchars($parcelle['id']) . "' $selected>" . htmlspecialchars_decode($parcelle['nom']) . "</option>";
+    echo "<option value='" . echapper($parcelle['id']) . "' $selected>" . echapper($parcelle['nom']) . "</option>";
 }
 ?>
                     </select>
@@ -246,23 +242,23 @@ else {
         <div class="report-header">
             <div>
                 <h3 style="margin:0; color: white;">Parcelle :
-                    <?php echo htmlspecialchars_decode($intervention['parcelle_nom']); ?>
+                    <?php echo echapper($intervention['parcelle_nom']); ?>
                 </h3>
                 <div class="report-meta">
                     <span>Ilot: <b>
-                            <?php echo htmlspecialchars($intervention['parcelle_ilot']); ?>
+                            <?php echo echapper($intervention['parcelle_ilot']); ?>
                         </b></span>
                     <span>Surface: <b>
-                            <?php echo htmlspecialchars($intervention['parcelle_surface']); ?> ha
+                            <?php echo echapper($intervention['parcelle_surface']); ?> ha
                         </b></span>
                     <span>Culture: <b>
-                            <?php echo htmlspecialchars_decode($intervention['type_culture']); ?>
+                            <?php echo echapper($intervention['type_culture']); ?>
                         </b></span>
                 </div>
             </div>
             <div style="text-align: right;">
                 <span class="badge">CAMPAGNE
-                    <?php echo htmlspecialchars($intervention['annee_culturale']); ?>
+                    <?php echo echapper($intervention['annee_culturale']); ?>
                 </span>
             </div>
         </div>
@@ -291,19 +287,19 @@ else {
 ?>
                     <tr>
                         <td>
-                            <?php echo htmlspecialchars($intervention['date']); ?>
+                            <?php echo echapper($intervention['date']); ?>
                         </td>
                         <td style="font-weight: 500;">
-                            <?php echo htmlspecialchars_decode($intervention['engrais_nom']); ?>
+                            <?php echo echapper($intervention['engrais_nom']); ?>
                         </td>
                         <td>
-                            <?php echo htmlspecialchars($intervention['quantite']); ?>
+                            <?php echo echapper($intervention['quantite']); ?>
                         </td>
                         <td>
-                            <?php echo htmlspecialchars($intervention['quantite_par_ha']); ?>
+                            <?php echo echapper($intervention['quantite_par_ha']); ?>
                         </td>
                         <td style="color: var(--text-muted); font-size: 0.8rem;">
-                            <?php echo htmlspecialchars($intervention['engrais_unite']); ?>
+                            <?php echo echapper($intervention['engrais_unite']); ?>
                         </td>
                         <td>
                             <?php echo round($intervention['total_NO3'], 2); ?>

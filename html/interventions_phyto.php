@@ -1,17 +1,12 @@
 <?php
-session_start();
-require_once 'includes/db.php';
-
-if (!isset($_SESSION['user_id'])) {
-    header('Location: login.php');
-    exit;
-}
+require_once 'includes/securite.php';
+exiger_connexion();
 
 $db = getDB();
 
 function clean_input($data)
 {
-    return htmlspecialchars(stripslashes(trim($data)));
+    return trim($data);
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -104,8 +99,8 @@ $interventions = $db->query('SELECT ip.*, p.nom as parcelle_nom, p.surface, p.il
 $produits->reset();
 while ($produit = $produits->fetchArray(SQLITE3_ASSOC)):
 ?>
-                                <option value="<?php echo $produit['id']; ?>"><?php echo htmlspecialchars_decode($produit['nom']); ?>
-                                <?php if ($produit['unite'] !== '') { ?> (<?php echo htmlspecialchars_decode($produit['unite_emballage']); ?>) <?php } ?>
+                                <option value="<?php echo $produit['id']; ?>"><?php echo echapper($produit['nom']); ?>
+                                <?php if ($produit['unite'] !== '') { ?> (<?php echo echapper($produit['unite_emballage']); ?>) <?php } ?>
                                 </option>
                             <?php
 endwhile; ?>
@@ -144,7 +139,8 @@ endwhile; ?>
                 <li><a href="rapport-phyto.php">Rapports</a></li>
             </ul>
         </nav>
-        <form id="logout" action="logout.php" method="get">
+        <form id="logout" action="logout.php" method="post">
+            <?= champ_csrf() ?>
             <button class="danger">Déconnexion</button>
         </form>
     </header>
@@ -159,6 +155,7 @@ endwhile; ?>
         <section class="card">
             <h3>Saisir une nouvelle intervention</h3>
             <form style="display:block" method="post">
+                <?= champ_csrf() ?>
                 <input type="hidden" name="action" value="create">
 
                 <div
@@ -172,7 +169,7 @@ endwhile; ?>
 $parcelles->reset();
 while ($parcelle = $parcelles->fetchArray(SQLITE3_ASSOC)): ?>
                             <option value="<?php echo $parcelle['id']; ?>">
-                                <?php echo htmlspecialchars_decode($parcelle['nom']); ?> (<?php echo $parcelle['surface']; ?> ha)
+                                <?php echo echapper($parcelle['nom']); ?> (<?php echo $parcelle['surface']; ?> ha)
                             </option>
                             <?php
 endwhile; ?>
@@ -222,8 +219,8 @@ endwhile; ?>
 $produits->reset();
 while ($produit = $produits->fetchArray(SQLITE3_ASSOC)): ?>
                                     <option value="<?php echo $produit['id']; ?>">
-                                        <?php echo htmlspecialchars_decode($produit['nom']); ?>
-                                        <?php if ($produit['unite'] !== '') { ?> (<?php echo htmlspecialchars_decode($produit['unite_emballage']); ?>) <?php } ?>
+                                        <?php echo echapper($produit['nom']); ?>
+                                        <?php if ($produit['unite'] !== '') { ?> (<?php echo echapper($produit['unite_emballage']); ?>) <?php } ?>
                                     </option>
                                     <?php
 endwhile; ?>
@@ -271,15 +268,15 @@ endwhile; ?>
                         <?php while ($intervention = $interventions->fetchArray(SQLITE3_ASSOC)): ?>
                         <tr>
                             <td><span class="badge" style="background: var(--primary-color); color: white;">
-                                    <?php echo htmlspecialchars($intervention['annee_culturale']); ?>
+                                    <?php echo echapper($intervention['annee_culturale']); ?>
                                 </span>
                             </td>
                             <td>
                                 <div>
-                                    <?php echo htmlspecialchars_decode($intervention['parcelle_nom']); ?>
+                                    <?php echo echapper($intervention['parcelle_nom']); ?>
                                 </div>
                                 <div style="font-size: 0.8rem; color: var(--text-muted);">Ilot:
-                                    <?php echo htmlspecialchars($intervention['parcelle_ilot']); ?>
+                                    <?php echo echapper($intervention['parcelle_ilot']); ?>
                                 </div>
                             </td>
                             <td>
@@ -292,7 +289,7 @@ endwhile; ?>
                             </td>
                             <td>
                                 <div>
-                                    <?php echo htmlspecialchars_decode($intervention['stade']); ?>
+                                    <?php echo echapper($intervention['stade']); ?>
                                 </div>
                             </td>
                             <td>
@@ -307,16 +304,16 @@ endwhile; ?>
                                     <div
                                         style="background: #f1f3f5; padding: 0.5rem; border-radius: 6px; font-size: 0.85rem;">
                                         <b>
-                                            <?php echo htmlspecialchars_decode($detail['produit_nom']); ?>
+                                            <?php echo echapper($detail['produit_nom']); ?>
                                         </b>:
-                                        <?php echo htmlspecialchars($detail['volume_total']); ?>
-                                        <?php echo htmlspecialchars($detail['produit_unite']); ?>
+                                        <?php echo echapper($detail['volume_total']); ?>
+                                        <?php echo echapper($detail['produit_unite']); ?>
                                         (<span style="color: var(--primary-color); font-weight: 600;">
                                             <?php echo round($detail['volume_total'] / $intervention['surface'], 3); ?>
-                                            <?php echo htmlspecialchars($detail['produit_unite']); ?>/ha
+                                            <?php echo echapper($detail['produit_unite']); ?>/ha
                                         </span>)
                                         <br /><small style="color: var(--text-muted);">Cible:
-                                            <?php echo htmlspecialchars_decode($detail['cible']); ?>
+                                            <?php echo echapper($detail['cible']); ?>
                                         </small>
                                     </div>
                                     <?php
@@ -325,6 +322,7 @@ endwhile; ?>
                             </td>
                             <td style="text-align: right;">
                                 <form method="post" style="display:inline;">
+                                    <?= champ_csrf() ?>
                                     <input type="hidden" name="action" value="delete">
                                     <input type="hidden" name="id" value="<?php echo $intervention['id']; ?>">
                                     <button type="submit" class="danger"

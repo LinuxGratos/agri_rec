@@ -1,11 +1,6 @@
 <?php
-session_start();
-require_once 'includes/db.php';
-
-if (!isset($_SESSION['user_id'])) {
-    header('Location: login.php');
-    exit;
-}
+require_once 'includes/securite.php';
+exiger_connexion();
 
 $db = getDB();
 
@@ -146,7 +141,8 @@ catch (Exception $e) {
                 <li><a href="interventions_phyto.php">Saisir une intervention</a></li>
             </ul>
         </nav>
-        <form id="logout" action="logout.php" method="get">
+        <form id="logout" action="logout.php" method="post">
+            <?= champ_csrf() ?>
             <button class="danger">Déconnexion</button>
         </form>
     </header>
@@ -171,7 +167,7 @@ catch (Exception $e) {
         $annees = $db->query("SELECT DISTINCT annee_culturale FROM interventions_phytosanitaires ORDER BY annee_culturale");
         while ($annee = $annees->fetchArray(SQLITE3_ASSOC)) {
             $selected = ($annee['annee_culturale'] == $annee_filter) ? 'selected' : '';
-            echo "<option value='" . htmlspecialchars($annee['annee_culturale']) . "' $selected>" . htmlspecialchars($annee['annee_culturale']) . "</option>";
+            echo "<option value='" . echapper($annee['annee_culturale']) . "' $selected>" . echapper($annee['annee_culturale']) . "</option>";
         }
         ?>
                             </select>
@@ -182,7 +178,7 @@ catch (Exception $e) {
                         
                     </form>
                 </div>
-                <div style="flex:1; margin-top:20px; text-align:right"><a class="button" autofocus href="stock-phyto-brut.php?annee=<?php echo $annee_filter; ?>" target="_blank">Imprimer le rapport</a></div>
+                <div style="flex:1; margin-top:20px; text-align:right"><a class="button" autofocus href="stock-phyto-brut.php?annee=<?php echo urlencode((string) $annee_filter); ?>" target="_blank">Imprimer le rapport</a></div>
             </div>
 
         </section>
@@ -197,7 +193,7 @@ else: ?>
         <div style="margin-bottom: 3rem; box-shadow: var(--shadow-md); border-radius: var(--radius); overflow: hidden;">
             <div class="report-header">
                 <div>
-                    <h3 style="margin:0; color: white;">Année : <?= htmlspecialchars($intervention['annee_culturale'])?>
+                    <h3 style="margin:0; color: white;">Année : <?= echapper($intervention['annee_culturale'])?>
                     </h3>
                 </div>
             </div>
@@ -215,12 +211,12 @@ else: ?>
                         <?php foreach ($intervention['interventions'] as $detail): ?>
                         <tr>
                             <td style="font-weight: 500;">
-                                <?= htmlspecialchars_decode($detail['produit_nom'])?>
+                                <?= echapper($detail['produit_nom'])?>
                             </td>
-                            <td><?= htmlspecialchars($detail['produit_amm'])?></td>
+                            <td><?= echapper($detail['produit_amm'])?></td>
                             <td>
-                                <?= htmlspecialchars($detail['volume_total'])?>
-                                <?= htmlspecialchars($detail['produit_unite'])?>
+                                <?= echapper($detail['volume_total'])?>
+                                <?= echapper($detail['produit_unite'])?>
                             </td>
                         </tr>
                         <?php

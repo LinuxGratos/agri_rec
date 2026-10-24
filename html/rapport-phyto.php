@@ -1,11 +1,6 @@
 <?php
-session_start();
-require_once 'includes/db.php';
-
-if (!isset($_SESSION['user_id'])) {
-    header('Location: login.php');
-    exit;
-}
+require_once 'includes/securite.php';
+exiger_connexion();
 
 $db = getDB();
 
@@ -193,7 +188,8 @@ $total_pages = ceil($total_interventions / $limit);
                 <li><a href="interventions_phyto.php">Saisir une intervention</a></li>
             </ul>
         </nav>
-        <form id="logout" action="logout.php" method="get">
+        <form id="logout" action="logout.php" method="post">
+            <?= champ_csrf() ?>
             <button class="danger">Déconnexion</button>
         </form>
     </header>
@@ -205,7 +201,7 @@ $total_pages = ceil($total_interventions / $limit);
         </div>
 
         <section class="card" style="margin-bottom: 3rem;">
-            <h3 style="display: inline">Filtrer le registre</h3><a class="button" autofocus style="margin-left: 20px" href="rapport-phyto-brut.php?annee=<?php echo $annee_filter; ?>&parcelle=<?php echo $parcelle_filter; ?>" target="_blank">Imprimer le rapport</a>
+            <h3 style="display: inline">Filtrer le registre</h3><a class="button" autofocus style="margin-left: 20px" href="rapport-phyto-brut.php?annee=<?php echo urlencode((string) $annee_filter); ?>&parcelle=<?php echo urlencode((string) $parcelle_filter); ?>" target="_blank">Imprimer le rapport</a>
             <div style="margin-top: 2rem;">
             <form method="get" style="display: flex; gap: 1rem; align-items: flex-end;">
                 <div style="flex:1;">
@@ -217,7 +213,7 @@ $total_pages = ceil($total_interventions / $limit);
 $annees = $db->query("SELECT DISTINCT annee_culturale FROM interventions_phytosanitaires ORDER BY annee_culturale");
 while ($annee = $annees->fetchArray(SQLITE3_ASSOC)) {
     $selected = ($annee['annee_culturale'] == $annee_filter) ? 'selected' : '';
-    echo "<option value='" . htmlspecialchars($annee['annee_culturale']) . "' $selected>" . htmlspecialchars($annee['annee_culturale']) . "</option>";
+    echo "<option value='" . echapper($annee['annee_culturale']) . "' $selected>" . echapper($annee['annee_culturale']) . "</option>";
 }
 ?>
                     </select>
@@ -231,7 +227,7 @@ while ($annee = $annees->fetchArray(SQLITE3_ASSOC)) {
 $parcelles = $db->query("SELECT id, nom FROM parcelles ORDER BY nom");
 while ($parcelle = $parcelles->fetchArray(SQLITE3_ASSOC)) {
     $selected = ($parcelle['id'] == $parcelle_filter) ? 'selected' : '';
-    echo "<option value='" . htmlspecialchars($parcelle['id']) . "' $selected>" . htmlspecialchars_decode($parcelle['nom']) . "</option>";
+    echo "<option value='" . echapper($parcelle['id']) . "' $selected>" . echapper($parcelle['nom']) . "</option>";
 }
 ?>
                     </select>
@@ -252,23 +248,23 @@ else: ?>
             <div class="report-header">
                 <div>
                     <h3 style="margin:0; color: white;">Parcelle :
-                        <?= htmlspecialchars_decode($intervention['parcelle_nom'])?>
+                        <?= echapper($intervention['parcelle_nom'])?>
                     </h3>
                     <div class="report-meta">
                         <span>Ilot: <b>
-                                <?= htmlspecialchars($intervention['parcelle_ilot'])?>
+                                <?= echapper($intervention['parcelle_ilot'])?>
                             </b></span>
                         <span>Surface: <b>
-                                <?= htmlspecialchars($intervention['surface'])?> ha
+                                <?= echapper($intervention['surface'])?> ha
                             </b></span>
                         <span>Culture: <b>
-                                <?= htmlspecialchars_decode($intervention['type_culture'])?>
+                                <?= echapper($intervention['type_culture'])?>
                             </b></span>
                     </div>
                 </div>
                 <div style="text-align: right;">
                     <span class="badge">CAMPAGNE
-                        <?= htmlspecialchars($intervention['annee_culturale'])?>
+                        <?= echapper($intervention['annee_culturale'])?>
                     </span>
                 </div>
             </div>
@@ -292,7 +288,7 @@ else: ?>
                             <td>
                                 <?php if ($detail['date'] !== $last_date) { ?>
                                 <span style="font-weight: 600;">
-                                    <?= htmlspecialchars($detail['date'])?>
+                                    <?= echapper($detail['date'])?>
                                 </span>
                                 <?php $last_date = $detail['date']; ?>
                                 <?php
@@ -301,26 +297,26 @@ else: ?>
                             <td>
                                 <?php if ($detail['stade'] !== $last_stade) { ?>
                                 <span style="font-weight: 600;">
-                                    <?= htmlspecialchars($detail['stade'])?>
+                                    <?= echapper($detail['stade'])?>
                                 </span>
                                 <?php $last_stade = $detail['stade']; ?>
                                 <?php
                                     } ?>
                             </td>
                             <td style="font-weight: 500;">
-                                <?= htmlspecialchars_decode($detail['produit_nom'])?>
+                                <?= echapper($detail['produit_nom'])?>
                             </td>
-                            <td><?= htmlspecialchars($detail['produit_amm'])?></td>
+                            <td><?= echapper($detail['produit_amm'])?></td>
                             <td>
-                                <?= htmlspecialchars($detail['volume_total'])?>
-                                <?= htmlspecialchars($detail['produit_unite'])?>
+                                <?= echapper($detail['volume_total'])?>
+                                <?= echapper($detail['produit_unite'])?>
                             </td>
                             <td><span style="color: var(--primary-color); font-weight: 600;">
-                                    <?= htmlspecialchars($detail['volume_par_ha'])?>
-                                    <?= htmlspecialchars($detail['produit_unite'])?>/ha
+                                    <?= echapper($detail['volume_par_ha'])?>
+                                    <?= echapper($detail['produit_unite'])?>/ha
                                 </span></td>
                             <td style="color: var(--text-muted); font-size: 0.85rem;">
-                                <?= htmlspecialchars_decode($detail['cible'])?>
+                                <?= echapper($detail['cible'])?>
                             </td>
                         </tr>
                         <?php

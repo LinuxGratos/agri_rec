@@ -1,8 +1,8 @@
 <?php
-require_once 'includes/db.php';
+require_once 'includes/securite.php';
 
 // Vérifier si le fichier de base de données n'existe pas
-if (file_exists(DB_PATH)) {
+if (base_installee()) {
     header('Location: login.php');
     exit();
 }
@@ -79,9 +79,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         FOREIGN KEY (produit_id) REFERENCES produits_phytosanitaires(id)
     )");
 
-    $username = htmlspecialchars(stripslashes(trim($_POST['username'])));
-    $entity = htmlspecialchars(stripslashes(trim($_POST['entity'])));
-    $telepac = htmlspecialchars(stripslashes(trim($_POST['telepac'])));
+    // Met la nouvelle base à la dernière version (voir includes/migrations.php)
+    migrer_base($db);
+
+    $username = trim($_POST['username']);
+    $entity = trim($_POST['entity']);
+    $telepac = trim($_POST['telepac']);
     $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
 
 $stmt = $db->prepare('INSERT OR IGNORE INTO users (username, entity, telepac, password) VALUES (:username, :entity, :telepac, :password)');
@@ -91,7 +94,7 @@ $stmt->bindValue(':telepac', $telepac, SQLITE3_TEXT);
 $stmt->bindValue(':password', $password, SQLITE3_TEXT);
 $stmt->execute();
 
-    echo "Installation terminée. Les tables ont été créées et l'utilisateur $username a été ajouté.";
+    echo "Installation terminée. Les tables ont été créées et l'utilisateur " . echapper($username) . " a été ajouté.";
 ?>
 
 <h3> <a href="login.php"> Accueil </a> </h3>

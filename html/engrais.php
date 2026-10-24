@@ -1,17 +1,12 @@
 <?php
-session_start();
-require_once "includes/db.php";
-
-if (!isset($_SESSION["user_id"])) {
-    header("Location: login.php");
-    exit();
-}
+require_once 'includes/securite.php';
+exiger_connexion();
 
 $db = getDB();
 
 function clean_input($data)
 {
-    return htmlspecialchars(stripslashes(trim($data)));
+    return trim($data);
 }
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
@@ -105,7 +100,8 @@ $engrais = $db->query("SELECT * FROM engrais ORDER BY nom");
                 <li><a href="interventions_engrais.php">Nouvelle Intervention</a></li>
             </ul>
         </nav>
-        <form id="logout" action="logout.php" method="get">
+        <form id="logout" action="logout.php" method="post">
+            <?= champ_csrf() ?>
             <button class="danger">Déconnexion</button>
         </form>
     </header>
@@ -120,6 +116,7 @@ $engrais = $db->query("SELECT * FROM engrais ORDER BY nom");
         <section class="card">
             <h3>Ajouter un nouvel engrais</h3>
             <form method="post">
+                <?= champ_csrf() ?>
                 <input type="hidden" name="action" value="create">
                 <div
                     style="display: grid; grid-template-columns: repeat(auto-fit, minmax(75px, 1fr)); gap: 1rem; width: 100%;">
@@ -180,34 +177,35 @@ $engrais = $db->query("SELECT * FROM engrais ORDER BY nom");
                         <?php while ($engrais_item = $engrais->fetchArray(SQLITE3_ASSOC)): ?>
                         <tr>
                             <td style="font-weight: 600;">
-                                <?php echo htmlspecialchars_decode($engrais_item["nom"]); ?>
+                                <?php echo echapper($engrais_item["nom"]); ?>
                             </td>
                             <td style="color: var(--text-muted);">
-                                <?php echo htmlspecialchars($engrais_item["unite"]); ?>
+                                <?php echo echapper($engrais_item["unite"]); ?>
                             </td>
                             <td>
-                                <?php echo htmlspecialchars($engrais_item["NO3"]); ?>%
+                                <?php echo echapper($engrais_item["NO3"]); ?>%
                             </td>
                             <td>
-                                <?php echo htmlspecialchars($engrais_item["P2O5"]); ?>%
+                                <?php echo echapper($engrais_item["P2O5"]); ?>%
                             </td>
                             <td>
-                                <?php echo htmlspecialchars($engrais_item["K2O"]); ?>%
+                                <?php echo echapper($engrais_item["K2O"]); ?>%
                             </td>
                             <td>
-                                <?php echo htmlspecialchars($engrais_item["SO3"]); ?>%
+                                <?php echo echapper($engrais_item["SO3"]); ?>%
                             </td>
                             <td>
-                                <?php echo htmlspecialchars($engrais_item["MgO"]); ?>%
+                                <?php echo echapper($engrais_item["MgO"]); ?>%
                             </td>
                             <td>
-                                <?php echo htmlspecialchars($engrais_item["CaO"]); ?>%
+                                <?php echo echapper($engrais_item["CaO"]); ?>%
                             </td>
                             <td style="text-align: right;">
                                 <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
                                     <button class="secondary"
-                                        onclick="showUpdateForm(<?php echo htmlspecialchars(json_encode($engrais_item)); ?>)">Modifier</button>
+                                        onclick="showUpdateForm(<?php echo echapper(json_encode($engrais_item)); ?>)">Modifier</button>
                                     <form method="post" style="display:inline;">
+                                        <?= champ_csrf() ?>
                                         <input type="hidden" name="action" value="delete">
                                         <input type="hidden" name="id" value="<?php echo $engrais_item["id"]; ?>">
                                         <button type="submit" class="danger"
@@ -229,6 +227,7 @@ endwhile; ?>
             <div class="card" style="width: 100%; max-width: 800px; margin: 2rem;">
                 <h3>Modifier l'engrais</h3>
                 <form method="post">
+                    <?= champ_csrf() ?>
                     <input type="hidden" name="action" value="update">
                     <input type="hidden" name="id" id="update_id">
 
@@ -271,12 +270,11 @@ endwhile; ?>
         </div>
     </div>
 
-    <script src="includes/functions.js"></script>
     <script>
         function showUpdateForm(engrais) {
             document.getElementById('updateFormBackdrop').style.display = 'flex';
             document.getElementById('update_id').value = engrais.id;
-            document.getElementById('update_nom').value = htmlSpecialCharsDecode(engrais.nom);
+            document.getElementById('update_nom').value = engrais.nom;
             document.getElementById('update_unite').value = engrais.unite;
             document.getElementById('update_NO3').value = engrais.NO3;
             document.getElementById('update_P2O5').value = engrais.P2O5;
