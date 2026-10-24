@@ -1,5 +1,6 @@
 <?php
 require_once 'includes/securite.php';
+require_once 'includes/listes.php';
 exiger_connexion();
 
 $db = getDB();
@@ -9,6 +10,14 @@ function clean_input($data)
 {
     return trim($data);
 }
+
+// Coordonnée GPS facultative : vide = non renseignée
+function coordonnee($valeur)
+{
+    return trim($valeur) === '' ? null : floatval(str_replace(',', '.', $valeur));
+}
+
+$message_erreur = '';
 
 // Traitement du formulaire
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
@@ -21,8 +30,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 $culture = clean_input($_POST["culture"]);
 
                 $stmt = $db->prepare(
-                    "INSERT INTO parcelles (nom, ilot, surface, culture) VALUES (:nom, :ilot, :surface, :culture)",
+                    "INSERT INTO parcelles (nom, ilot, surface, culture, latitude, longitude) VALUES (:nom, :ilot, :surface, :culture, :latitude, :longitude)",
                 );
+                $stmt->bindValue(":latitude", coordonnee($_POST["latitude"]), SQLITE3_FLOAT);
+                $stmt->bindValue(":longitude", coordonnee($_POST["longitude"]), SQLITE3_FLOAT);
                 $stmt->bindValue(":nom", $nom, SQLITE3_TEXT);
                 $stmt->bindValue(":ilot", $ilot, SQLITE3_INTEGER);
                 $stmt->bindValue(":surface", $surface, SQLITE3_FLOAT);
@@ -38,8 +49,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 $culture = clean_input($_POST["culture"]);
 
                 $stmt = $db->prepare(
-                    "UPDATE parcelles SET nom = :nom, ilot = :ilot, surface = :surface, culture = :culture WHERE id = :id",
+                    "UPDATE parcelles SET nom = :nom, ilot = :ilot, surface = :surface, culture = :culture, latitude = :latitude, longitude = :longitude WHERE id = :id",
                 );
+                $stmt->bindValue(":latitude", coordonnee($_POST["latitude"]), SQLITE3_FLOAT);
+                $stmt->bindValue(":longitude", coordonnee($_POST["longitude"]), SQLITE3_FLOAT);
                 $stmt->bindValue(":id", $id, SQLITE3_INTEGER);
                 $stmt->bindValue(":nom", $nom, SQLITE3_TEXT);
                 $stmt->bindValue(":ilot", $ilot, SQLITE3_INTEGER);
@@ -53,7 +66,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
                 $stmt = $db->prepare("DELETE FROM parcelles WHERE id = :id");
                 $stmt->bindValue(":id", $id, SQLITE3_INTEGER);
-                $stmt->execute();
+                try {
+                    $stmt->execute();
+                } catch (Exception $e) {
+                    $message_erreur = "Cette parcelle figure dans le registre : elle ne peut pas être supprimée.";
+                }
                 break;
         }
     }
@@ -100,6 +117,10 @@ $parcelles = $db->query("SELECT * FROM parcelles");
             <p style="color: var(--text-muted);">Répertoriez vos terres, leurs surfaces et les cultures en place.</p>
         </div>
 
+        <?php if ($message_erreur): ?>
+        <div class="message-erreur"><?= echapper($message_erreur) ?></div>
+        <?php endif; ?>
+
         <section class="card">
             <h3>Ajouter une parcelle</h3>
             <form method="post">
@@ -129,10 +150,22 @@ $parcelles = $db->query("SELECT * FROM parcelles");
                     </div>
                     <div>
                         <label
-                            style="display:block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.25rem;">Culture</label>
-                        <input type="text" name="culture" placeholder="ex: Blé" required style="width:100%;">
+                            style="display:block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.25rem;">Culture en place</label>
+                        <input type="text" name="culture" list="cultures" placeholder="ex: Blé tendre d'hiver" required style="width:100%;">
                     </div>
                 </div>
+                <div class="grille" style="margin-top: 1rem;">
+                    <div class="champ">
+                        <label>Latitude (facultatif)</label>
+                        <input type="text" name="latitude" placeholder="ex: 48.1173">
+                    </div>
+                    <div class="champ">
+                        <label>Longitude (facultatif)</label>
+                        <input type="text" name="longitude" placeholder="ex: -1.6778">
+                    </div>
+                </div>
+                <p style="color: var(--text-muted); font-size: 0.8rem;">Le n° d'îlot PAC suffit à localiser la parcelle.
+                    Les coordonnées GPS servent pour les parcelles hors déclaration PAC.</p>
                 <div style="margin-top: 1.5rem; text-align: right; width: 100%;">
                     <input type="submit" value="Ajouter la parcelle">
                 </div>
@@ -149,6 +182,7 @@ $parcelles = $db->query("SELECT * FROM parcelles");
                             <th>Ilot</th>
                             <th>Surface (ha)</th>
                             <th>Culture</th>
+                            <th>GPS</th>
                             <th style="text-align: center;">Actions</th>
                         </tr>
                     </thead>
@@ -159,6 +193,7 @@ $parcelles = $db->query("SELECT * FROM parcelles");
                             <td><?php echo echapper($parcelle["ilot"]); ?></td>
                             <td><?php echo echapper($parcelle["surface"]); ?> ha</td>
                             <td><?php echo echapper($parcelle["culture"]); ?></td>
+                            <td><?php echo echapper(trim($parcelle["latitude"] . ' ' . $parcelle["longitude"])); ?></td>
                             <td style="text-align: right;">
                                 <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
                                     <button class="secondary"
@@ -214,7 +249,18 @@ endwhile; ?>
                     <div style="width: 100%; margin-bottom: 1.5rem;">
                         <label
                             style="display:block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.25rem;">Culture</label>
-                        <input type="text" name="culture" id="update_culture" required style="width:100%;">
+                        <input type="text" name="culture" id="update_culture" list="cultures" required style="width:100%;">
+                    </div>
+
+                    <div class="grille" style="margin-bottom: 1.5rem;">
+                        <div class="champ">
+                            <label>Latitude (facultatif)</label>
+                            <input type="text" name="latitude" id="update_latitude">
+                        </div>
+                        <div class="champ">
+                            <label>Longitude (facultatif)</label>
+                            <input type="text" name="longitude" id="update_longitude">
+                        </div>
                     </div>
 
                     <div style="display: flex; justify-content: flex-end; gap: 1rem; width: 100%;">
@@ -226,6 +272,8 @@ endwhile; ?>
         </div>
     </div>
 
+    <?= datalist('cultures', liste_cultures()) ?>
+
     <script>
         function showUpdateForm(parcelle) {
             document.getElementById('updateFormBackdrop').style.display = 'flex';
@@ -234,6 +282,8 @@ endwhile; ?>
             document.getElementById('update_ilot').value = parcelle.ilot;
             document.getElementById('update_surface').value = parcelle.surface;
             document.getElementById('update_culture').value = parcelle.culture;
+            document.getElementById('update_latitude').value = parcelle.latitude ?? '';
+            document.getElementById('update_longitude').value = parcelle.longitude ?? '';
         }
 
         function hideUpdateForm() {

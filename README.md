@@ -29,6 +29,19 @@ Ne laissez jamais `DEBUG_MODE` à `true` dans `html/includes/config.php` en deho
 Depuis le tableau de bord, la carte **Sauvegarde** télécharge une copie complète de vos données.
 Pour restaurer, remplacez le fichier `data/database.sqlite` par la copie téléchargée (renommée `database.sqlite`).
 
+### Registre phytosanitaire (arrêté du 24 décembre 2025)
+
+Pour chaque traitement, AgriRec enregistre les informations demandées depuis le 1er janvier 2026 :
+SIRET de l'exploitation (page **Exploitation**), nom commercial et n° d'AMM, produit ou adjuvant,
+date et heures de début / fin, culture, surface traitée, dose par hectare, stade BBCH, îlot PAC
+(ou coordonnées GPS), délai de rentrée, mention « utilisable en agriculture biologique », et le nom et le
+SIRET du prestataire ou de l'entraide le cas échéant. Les semis de semences traitées hors de l'exploitation
+ont leur propre page.
+
+Chaque intervention garde une copie des informations du moment (culture, îlot, produit, AMM) :
+modifier une parcelle ou le catalogue ne change pas le registre. Une intervention n'est jamais effacée :
+elle est annulée avec un motif et reste visible, barrée, dans l'historique.
+
 ### Utilisation
 
 Le couple utilisateur /mot de passe est à créer à la première connexion.

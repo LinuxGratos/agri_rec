@@ -47,6 +47,8 @@ function getDB() {
     try {
         $db = new SQLite3(DB_PATH);
         $db->enableExceptions(true);
+        // Empêche de supprimer une parcelle ou un produit utilisé dans le registre
+        $db->exec('PRAGMA foreign_keys = ON');
     } catch (Exception $e) {
         erreur_bloquante("Une erreur est survenue lors de la connexion à la base de données.", $e->getMessage());
     }

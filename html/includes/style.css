@@ -591,3 +591,60 @@ button.danger:hover {
         font-size: 0.95rem;
     }
 }
+
+/* --- Classes communes aux formulaires du registre --- */
+.grille {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    width: 100%;
+}
+
+.champ label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.champ input,
+.champ select {
+    width: 100%;
+}
+
+.champ small {
+    color: var(--text-muted);
+}
+
+.message-erreur,
+.message-info {
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+}
+
+.message-erreur {
+    background: rgba(239, 35, 60, 0.1);
+    color: #b00020;
+}
+
+.message-info {
+    background: #fff3cd;
+    color: #664d03;
+}
+
+tr.annulee td {
+    text-decoration: line-through;
+    color: var(--text-muted);
+}
+
+.etiquette {
+    display: inline-block;
+    padding: 0.1rem 0.4rem;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    background: #e9ecef;
+    color: var(--text-main);
+    text-decoration: none;
+}

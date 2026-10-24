@@ -85,9 +85,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim($_POST['username']);
     $entity = trim($_POST['entity']);
     $telepac = trim($_POST['telepac']);
+    $siret = preg_replace('/[^0-9]/', '', $_POST['siret']);
     $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
 
-$stmt = $db->prepare('INSERT OR IGNORE INTO users (username, entity, telepac, password) VALUES (:username, :entity, :telepac, :password)');
+$stmt = $db->prepare('INSERT OR IGNORE INTO users (username, entity, siret, telepac, password) VALUES (:username, :entity, :siret, :telepac, :password)');
+$stmt->bindValue(':siret', $siret, SQLITE3_TEXT);
 $stmt->bindValue(':username', $username, SQLITE3_TEXT);
 $stmt->bindValue(':entity', $entity, SQLITE3_TEXT);
 $stmt->bindValue(':telepac', $telepac, SQLITE3_TEXT);
@@ -201,9 +203,15 @@ else: ?>
 
 
                 <div style="text-align: left; margin-bottom: 1.5rem;">
-                    <label style="display:block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.25rem;">N° de
-                        compte Telepac</label>
-                    <input type="text" name="telepac" placeholder="ex: 0123456" required style="width:100%;">
+                    <label style="display:block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.25rem;">N° SIRET
+                        de l'établissement</label>
+                    <input type="text" name="siret" placeholder="14 chiffres" pattern="[0-9 ]{14,17}" required style="width:100%;">
+                </div>
+
+                <div style="text-align: left; margin-bottom: 1.5rem;">
+                    <label style="display:block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.25rem;">N°
+                        PACAGE (Telepac)</label>
+                    <input type="text" name="telepac" placeholder="ex: 012345678" required style="width:100%;">
                 </div>
 
                 <div style="text-align: left; margin-bottom: 2.5rem;">
