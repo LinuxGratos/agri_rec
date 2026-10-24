@@ -1,11 +1,6 @@
 <?php
-session_start();
-require_once 'includes/db.php';
-
-if (!isset($_SESSION['user_id'])) {
-    header('Location: login.php');
-    exit;
-}
+require_once 'includes/securite.php';
+exiger_connexion();
 
 $db = getDB();
 
@@ -151,7 +146,7 @@ $total_pages = ceil($total_interventions / $limit);
 </head>
 <body>
     <h1>Registre des interventions phytosanitaires</h1>
-    <h2><?php echo $entity; ?> - Telepac: <?php echo $telepac; ?></h2>
+    <h2><?php echo echapper($entity); ?> - Telepac: <?php echo echapper($telepac); ?></h2>
     <br>
     <!-- Formulaire de tri -->
     <form method="get">
@@ -161,7 +156,7 @@ $total_pages = ceil($total_interventions / $limit);
             $annees = $db->query("SELECT DISTINCT annee_culturale FROM interventions_phytosanitaires ORDER BY annee_culturale");
             while ($annee = $annees->fetchArray(SQLITE3_ASSOC)) {
                 $selected = ($annee['annee_culturale'] == $annee_filter) ? 'selected' : '';
-                echo "<option value='" . htmlspecialchars($annee['annee_culturale']) . "' $selected>" . htmlspecialchars($annee['annee_culturale']) . "</option>";
+                echo "<option value='" . echapper($annee['annee_culturale']) . "' $selected>" . echapper($annee['annee_culturale']) . "</option>";
             }
             ?>
         </select>
@@ -171,7 +166,7 @@ $total_pages = ceil($total_interventions / $limit);
             $parcelles = $db->query("SELECT id, nom FROM parcelles ORDER BY nom");
             while ($parcelle = $parcelles->fetchArray(SQLITE3_ASSOC)) {
                 $selected = ($parcelle['id'] == $parcelle_filter) ? 'selected' : '';
-                echo "<option value='" . htmlspecialchars($parcelle['id']) . "' $selected>" . htmlspecialchars_decode($parcelle['nom']) . "</option>";
+                echo "<option value='" . echapper($parcelle['id']) . "' $selected>" . echapper($parcelle['nom']) . "</option>";
             }
             ?>
         </select>
@@ -187,11 +182,11 @@ $total_pages = ceil($total_interventions / $limit);
                 <thead>
                     <tr>
                         <th colspan="7">
-                            Année culturale: <?= htmlspecialchars($intervention['annee_culturale']) ?> |
-                            Parcelle : <?= htmlspecialchars_decode($intervention['parcelle_nom']) ?> <br/>
-                            Ilot : <?= htmlspecialchars($intervention['parcelle_ilot']) ?> <br/>
-                            Surface : <?= htmlspecialchars($intervention['surface']) ?> ha |
-                            Culture : <?= htmlspecialchars_decode($intervention['type_culture']) ?>
+                            Année culturale: <?= echapper($intervention['annee_culturale']) ?> |
+                            Parcelle : <?= echapper($intervention['parcelle_nom']) ?> <br/>
+                            Ilot : <?= echapper($intervention['parcelle_ilot']) ?> <br/>
+                            Surface : <?= echapper($intervention['surface']) ?> ha |
+                            Culture : <?= echapper($intervention['type_culture']) ?>
                         </th>
                     </tr>
                     <tr>
@@ -207,13 +202,13 @@ $total_pages = ceil($total_interventions / $limit);
                 <tbody>
                     <?php foreach ($intervention['interventions'] as $detail) : ?>
                         <tr>
-                            <td><?php if ($detail['date'] !== $last_date) { echo htmlspecialchars($detail['date']); $last_date = $detail['date'];}  ?></td>
-                            <td><?php if ($detail['stade'] !== $last_stade) { echo htmlspecialchars_decode($detail['stade']); $last_stade = $detail['stade'];}  ?></td>
-                            <td><?= htmlspecialchars_decode($detail['produit_nom']) ?></td>
-                            <td><?= htmlspecialchars($detail['produit_amm']) ?></td>
-                            <td><?= htmlspecialchars($detail['volume_total']) ?> <?= htmlspecialchars($detail['produit_unite']) ?></td>
-                            <td><?= htmlspecialchars($detail['volume_par_ha']) ?> <?= htmlspecialchars($detail['produit_unite']) ?></td>
-                            <td><?= htmlspecialchars_decode($detail['cible']) ?></td>
+                            <td><?php if ($detail['date'] !== $last_date) { echo echapper($detail['date']); $last_date = $detail['date'];}  ?></td>
+                            <td><?php if ($detail['stade'] !== $last_stade) { echo echapper($detail['stade']); $last_stade = $detail['stade'];}  ?></td>
+                            <td><?= echapper($detail['produit_nom']) ?></td>
+                            <td><?= echapper($detail['produit_amm']) ?></td>
+                            <td><?= echapper($detail['volume_total']) ?> <?= echapper($detail['produit_unite']) ?></td>
+                            <td><?= echapper($detail['volume_par_ha']) ?> <?= echapper($detail['produit_unite']) ?></td>
+                            <td><?= echapper($detail['cible']) ?></td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>

@@ -1,20 +1,6 @@
 <?php
-session_start();
-require_once "includes/config.php";
-
-// Vérifier si le fichier de base de données existe
-if (!file_exists(DB_PATH)) {
-    header("Location: install.php");
-    exit();
-}
-
-// Vérifier si l'utilisateur est authentifié
-if (!isset($_SESSION["user_id"])) {
-    header("Location: login.php");
-    exit();
-}
-
-// Si l'utilisateur est authentifié et la base de données existe, afficher le contenu principal
+require_once 'includes/securite.php';
+exiger_connexion();
 ?>
 
 <!DOCTYPE html>
@@ -35,7 +21,8 @@ if (!isset($_SESSION["user_id"])) {
                 <h2 style="margin:0; font-size: 1.25rem;">AgriRec</h2>
             </a>
         </div>
-        <form id="logout" action="logout.php" method="get">
+        <form id="logout" action="logout.php" method="post">
+            <?= champ_csrf() ?>
             <button class="danger">Déconnexion</button>
         </form>
     </header>
@@ -90,6 +77,13 @@ if (!isset($_SESSION["user_id"])) {
                 <h3>Stock phyto</h3>
                 <p>Utilisation des stocks phytosanitaires</p>
                 <div style="margin-top: 1rem; font-weight: 600;">Accéder &rarr;</div>
+            </a>
+        </div>
+        <div class="dashboard-grid">
+            <a href="sauvegarde.php" class="nav-card">
+                <h3>Sauvegarde</h3>
+                <p>Télécharger une copie complète de vos données</p>
+                <div style="margin-top: 1rem; font-weight: 600;">Télécharger &rarr;</div>
             </a>
         </div>
     </div>

@@ -1,17 +1,12 @@
 <?php
-session_start();
-require_once "includes/db.php";
-
-if (!isset($_SESSION["user_id"])) {
-    header("Location: login.php");
-    exit();
-}
+require_once 'includes/securite.php';
+exiger_connexion();
 
 $db = getDB();
 
 function clean_input($data)
 {
-    return htmlspecialchars(stripslashes(trim($data)));
+    return trim($data);
 }
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
@@ -96,7 +91,8 @@ $produits = $db->query("SELECT * FROM produits_phytosanitaires ORDER BY nom");
                 <li><a href="interventions_phyto.php">Nouvelle Intervention</a></li>
             </ul>
         </nav>
-        <form id="logout" action="logout.php" method="get">
+        <form id="logout" action="logout.php" method="post">
+            <?= champ_csrf() ?>
             <button class="danger">Déconnexion</button>
         </form>
     </header>
@@ -110,6 +106,7 @@ $produits = $db->query("SELECT * FROM produits_phytosanitaires ORDER BY nom");
         <section class="card">
             <h3>Ajouter un produit</h3>
             <form method="post">
+                <?= champ_csrf() ?>
                 <input type="hidden" name="action" value="create">
                 <div
                     style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; width: 100%;">
@@ -151,17 +148,18 @@ $produits = $db->query("SELECT * FROM produits_phytosanitaires ORDER BY nom");
                         <?php while ($produit = $produits->fetchArray(SQLITE3_ASSOC)): ?>
                         <tr>
                             <td style="font-weight: 600;">
-                                <?php echo htmlspecialchars_decode($produit["nom"]); ?>
+                                <?php echo echapper($produit["nom"]); ?>
                             </td>
                             <td style="color: var(--text-muted);">
-                                <?php echo htmlspecialchars($produit["unite_emballage"]); ?>
+                                <?php echo echapper($produit["unite_emballage"]); ?>
                             </td>
-                            <td><?php echo htmlspecialchars($produit["amm"]); ?></td>
+                            <td><?php echo echapper($produit["amm"]); ?></td>
                             <td style="text-align: center;">
                                 <div>
                                     <button class="secondary"
-                                        onclick="showUpdateForm(<?php echo htmlspecialchars(json_encode($produit)); ?>)">Modifier</button>
+                                        onclick="showUpdateForm(<?php echo echapper(json_encode($produit)); ?>)">Modifier</button>
                                     <form method="post" style="display:inline;">
+                                        <?= champ_csrf() ?>
                                         <input type="hidden" name="action" value="delete">
                                         <input type="hidden" name="id" value="<?php echo $produit["id"]; ?>">
                                         <button type="submit" class="danger"
@@ -183,6 +181,7 @@ endwhile; ?>
             <div class="card" style="width: 100%; max-width: 600px; margin: 2rem;">
                 <h3>Modifier le produit</h3>
                 <form method="post">
+                    <?= champ_csrf() ?>
                     <input type="hidden" name="action" value="update">
                     <input type="hidden" name="id" id="update_id">
 
@@ -216,12 +215,11 @@ endwhile; ?>
         </div>
     </div>
 
-    <script src="includes/functions.js"></script>
     <script>
         function showUpdateForm(produit) {
             document.getElementById('updateFormBackdrop').style.display = 'flex';
             document.getElementById('update_id').value = produit.id;
-            document.getElementById('update_nom').value = htmlSpecialCharsDecode(produit.nom);
+            document.getElementById('update_nom').value = produit.nom;
             document.getElementById('update_unite_emballage').value = produit.unite_emballage;
             document.getElementById('update_amm').value = produit.amm;
         }

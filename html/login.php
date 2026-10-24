@@ -1,14 +1,15 @@
 <?php
-session_start();
-require_once 'includes/db.php';
+require_once 'includes/securite.php';
+demarrer_session();
 
 // Vérifier si le fichier de base de données existe
-if (!file_exists(DB_PATH)) {
+if (!base_installee()) {
     header('Location: install.php');
     exit();
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    verifier_csrf();
     $username = $_POST['username'];
     $password = $_POST['password'];
 
@@ -19,6 +20,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user = $result->fetchArray(SQLITE3_ASSOC);
 
     if ($user && password_verify($password, $user['password'])) {
+        // Nouvel identifiant de session à chaque connexion (évite le vol de session)
+        session_regenerate_id(true);
         $_SESSION['user_id'] = $user['id'];
         header('Location: index.php');
         exit;
@@ -54,6 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 endif; ?>
 
         <form method="post">
+            <?= champ_csrf() ?>
             <div style="width: 100%; text-align: left; margin-bottom: 1rem;">
                 <label
                     style="display: block; font-size: 0.8rem; font-weight: 600; text-transform: uppercase;">Utilisateur</label>

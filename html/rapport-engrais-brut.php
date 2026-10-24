@@ -1,11 +1,6 @@
 <?php
-session_start();
-require_once 'includes/db.php';
-
-if (!isset($_SESSION['user_id'])) {
-    header('Location: login.php');
-    exit;
-}
+require_once 'includes/securite.php';
+exiger_connexion();
 
 $db = getDB();
 
@@ -87,7 +82,7 @@ while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
     </head>
     <body>
         <h1>Registre des interventions engrais</h1>
-        <h2><?php echo $interventions[0]['entity']; ?> - Telepac: <?php echo $interventions[0]['telepac']; ?></h2>
+        <h2><?php echo echapper($interventions[0]['entity']); ?> - Telepac: <?php echo echapper($interventions[0]['telepac']); ?></h2>
         <!-- Formulaire de tri -->
         <form method="get">
             <select name="annee">
@@ -96,7 +91,7 @@ while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
                 $annees = $db->query("SELECT DISTINCT annee_culturale FROM interventions_engrais ORDER BY annee_culturale");
                 while ($annee = $annees->fetchArray(SQLITE3_ASSOC)) {
                     $selected = ($annee['annee_culturale'] == $annee_filter) ? 'selected' : '';
-                    echo "<option value='" . htmlspecialchars($annee['annee_culturale']) . "' $selected>" . htmlspecialchars($annee['annee_culturale']) . "</option>";
+                    echo "<option value='" . echapper($annee['annee_culturale']) . "' $selected>" . echapper($annee['annee_culturale']) . "</option>";
                 }
                 ?>
             </select>
@@ -106,7 +101,7 @@ while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
                 $parcelles = $db->query("SELECT id, nom FROM parcelles ORDER BY nom");
                 while ($parcelle = $parcelles->fetchArray(SQLITE3_ASSOC)) {
                     $selected = ($parcelle['id'] == $parcelle_filter) ? 'selected' : '';
-                    echo "<option value='" . htmlspecialchars($parcelle['id']) . "' $selected>" . htmlspecialchars_decode($parcelle['nom']) . "</option>";
+                    echo "<option value='" . echapper($parcelle['id']) . "' $selected>" . echapper($parcelle['nom']) . "</option>";
                 }
                 ?>
             </select>
@@ -123,7 +118,7 @@ while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
             function afficherTotal($annee, $totals) {
         ?>
                 <tr class="total-row">
-                    <td colspan="5">Total pour l'année <?php echo htmlspecialchars($annee); ?></td>
+                    <td colspan="5">Total pour l'année <?php echo echapper($annee); ?></td>
                     <td><?php echo round($totals['NO3'], 2); ?></td>
                     <td><?php echo round($totals['P2O5'], 2); ?></td>
                     <td><?php echo round($totals['K2O'], 2); ?></td>
@@ -153,11 +148,11 @@ while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
                     <table>
                         <tr>
                             <th>
-                            Année culturale : <?php echo htmlspecialchars($intervention['annee_culturale']); ?> |
-                            Parcelle : <?php echo htmlspecialchars_decode($intervention['parcelle_nom']); ?> <br/>
-                            Ilot : <?php echo htmlspecialchars($intervention['parcelle_ilot']); ?> <br/>
-                            Surface : <?php echo htmlspecialchars($intervention['parcelle_surface']); ?> |
-                            Culture : <?php echo htmlspecialchars_decode($intervention['type_culture']); ?>
+                            Année culturale : <?php echo echapper($intervention['annee_culturale']); ?> |
+                            Parcelle : <?php echo echapper($intervention['parcelle_nom']); ?> <br/>
+                            Ilot : <?php echo echapper($intervention['parcelle_ilot']); ?> <br/>
+                            Surface : <?php echo echapper($intervention['parcelle_surface']); ?> |
+                            Culture : <?php echo echapper($intervention['type_culture']); ?>
                             </th>
                             <th colspan="10" class="emptyth"></th>
                         </tr>
@@ -179,11 +174,11 @@ while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
                 } ;
                 ?>
                 <tr>
-                    <td><?php echo htmlspecialchars($intervention['date']); ?></td>
-                    <td><?php echo htmlspecialchars_decode($intervention['engrais_nom']); ?></td>
-                    <td><?php echo htmlspecialchars($intervention['engrais_unite']); ?></td>
-                    <td><?php echo htmlspecialchars($intervention['quantite']); ?></td>
-                    <td><?php echo htmlspecialchars($intervention['quantite_par_ha']); ?></td>
+                    <td><?php echo echapper($intervention['date']); ?></td>
+                    <td><?php echo echapper($intervention['engrais_nom']); ?></td>
+                    <td><?php echo echapper($intervention['engrais_unite']); ?></td>
+                    <td><?php echo echapper($intervention['quantite']); ?></td>
+                    <td><?php echo echapper($intervention['quantite_par_ha']); ?></td>
                     <td><?php echo round($intervention['total_NO3'], 2); ?></td>
                     <td><?php echo round($intervention['total_P2O5'], 2); ?></td>
                     <td><?php echo round($intervention['total_K2O'], 2); ?></td>

@@ -1,11 +1,6 @@
 <?php
-session_start();
-require_once 'includes/db.php';
-
-if (!isset($_SESSION['user_id'])) {
-    header('Location: login.php');
-    exit;
-}
+require_once 'includes/securite.php';
+exiger_connexion();
 
 $db = getDB();
 
@@ -104,7 +99,7 @@ try {
 </head>
 <body>
     <h1>Stock phytosanitaire</h1>
-    <h2><?php echo $entity; ?> - Telepac: <?php echo $telepac; ?></h2>
+    <h2><?php echo echapper($entity); ?> - Telepac: <?php echo echapper($telepac); ?></h2>
     <br>
     <!-- Formulaire de tri -->
     <form method="get">
@@ -114,7 +109,7 @@ try {
             $annees = $db->query("SELECT DISTINCT annee_culturale FROM interventions_phytosanitaires ORDER BY annee_culturale");
             while ($annee = $annees->fetchArray(SQLITE3_ASSOC)) {
                 $selected = ($annee['annee_culturale'] == $annee_filter) ? 'selected' : '';
-                echo "<option value='" . htmlspecialchars($annee['annee_culturale']) . "' $selected>" . htmlspecialchars($annee['annee_culturale']) . "</option>";
+                echo "<option value='" . echapper($annee['annee_culturale']) . "' $selected>" . echapper($annee['annee_culturale']) . "</option>";
             }
             ?>
         </select>
@@ -130,7 +125,7 @@ try {
                 <thead>
                     <tr>
                         <th colspan="7">
-                            Année culturale: <?= htmlspecialchars($intervention['annee_culturale']) ?>
+                            Année culturale: <?= echapper($intervention['annee_culturale']) ?>
                         </th>
                     </tr>
                     <tr>
@@ -142,9 +137,9 @@ try {
                 <tbody>
                     <?php foreach ($intervention['interventions'] as $detail) : ?>
                         <tr>
-                            <td><?= htmlspecialchars_decode($detail['produit_nom']) ?></td>
-                            <td><?= htmlspecialchars($detail['produit_amm']) ?></td>
-                            <td><?= htmlspecialchars($detail['volume_total']) ?> <?= htmlspecialchars($detail['produit_unite']) ?></td>
+                            <td><?= echapper($detail['produit_nom']) ?></td>
+                            <td><?= echapper($detail['produit_amm']) ?></td>
+                            <td><?= echapper($detail['volume_total']) ?> <?= echapper($detail['produit_unite']) ?></td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>

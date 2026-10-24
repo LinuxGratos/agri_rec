@@ -1,11 +1,13 @@
 <?php
-session_start();
+require_once 'includes/securite.php';
+demarrer_session();
 
-// Vérifier si l'utilisateur est authentifié
-if (isset($_SESSION['user_id'])) {
+// La déconnexion se fait par le bouton (formulaire POST protégé)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['user_id'])) {
+    verifier_csrf();
     session_destroy();
-    header('Location: login.php');
-    exit();
 }
 
+header('Location: login.php');
+exit();
 ?>

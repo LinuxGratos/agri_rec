@@ -1,21 +1,13 @@
 <?php
-session_start();
-require_once "includes/db.php";
-
-if (!isset($_SESSION["user_id"])) {
-    header("Location: login.php");
-    exit();
-}
+require_once 'includes/securite.php';
+exiger_connexion();
 
 $db = getDB();
 
 // Fonction pour nettoyer les entrées
 function clean_input($data)
 {
-    $data = trim($data);
-    $data = stripslashes($data);
-    $data = htmlspecialchars($data);
-    return $data;
+    return trim($data);
 }
 
 // Traitement du formulaire
@@ -96,7 +88,8 @@ $parcelles = $db->query("SELECT * FROM parcelles");
                 <li><a href="phytosanitaires.php">Phyto</a></li>
             </ul>
         </nav>
-        <form id="logout" action="logout.php" method="get">
+        <form id="logout" action="logout.php" method="post">
+            <?= champ_csrf() ?>
             <button class="danger">Déconnexion</button>
         </form>
     </header>
@@ -110,6 +103,7 @@ $parcelles = $db->query("SELECT * FROM parcelles");
         <section class="card">
             <h3>Ajouter une parcelle</h3>
             <form method="post">
+                <?= champ_csrf() ?>
                 <input type="hidden" name="action" value="create">
                 <div
                     style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; width: 100%;">
@@ -161,15 +155,16 @@ $parcelles = $db->query("SELECT * FROM parcelles");
                     <tbody>
                         <?php while ($parcelle = $parcelles->fetchArray(SQLITE3_ASSOC)): ?>
                         <tr>
-                            <td style="font-weight: 600;"><?php echo htmlspecialchars_decode($parcelle["nom"]); ?></td>
-                            <td><?php echo htmlspecialchars($parcelle["ilot"]); ?></td>
-                            <td><?php echo htmlspecialchars($parcelle["surface"]); ?> ha</td>
-                            <td><?php echo htmlspecialchars_decode($parcelle["culture"]); ?></td>
+                            <td style="font-weight: 600;"><?php echo echapper($parcelle["nom"]); ?></td>
+                            <td><?php echo echapper($parcelle["ilot"]); ?></td>
+                            <td><?php echo echapper($parcelle["surface"]); ?> ha</td>
+                            <td><?php echo echapper($parcelle["culture"]); ?></td>
                             <td style="text-align: right;">
                                 <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
                                     <button class="secondary"
-                                        onclick="showUpdateForm(<?php echo htmlspecialchars(json_encode($parcelle)); ?>)">Modifier</button>
+                                        onclick="showUpdateForm(<?php echo echapper(json_encode($parcelle)); ?>)">Modifier</button>
                                     <form method="post" style="display:inline;">
+                                        <?= champ_csrf() ?>
                                         <input type="hidden" name="action" value="delete">
                                         <input type="hidden" name="id" value="<?php echo $parcelle["id"]; ?>">
                                         <button type="submit" class="danger"
@@ -191,6 +186,7 @@ endwhile; ?>
             <div class="card" style="width: 100%; max-width: 600px; margin: 2rem;">
                 <h3>Modifier la parcelle</h3>
                 <form method="post">
+                    <?= champ_csrf() ?>
                     <input type="hidden" name="action" value="update">
                     <input type="hidden" name="id" id="update_id">
 
@@ -230,15 +226,14 @@ endwhile; ?>
         </div>
     </div>
 
-    <script src="includes/functions.js"></script>
     <script>
         function showUpdateForm(parcelle) {
             document.getElementById('updateFormBackdrop').style.display = 'flex';
             document.getElementById('update_id').value = parcelle.id;
-            document.getElementById('update_nom').value = htmlSpecialCharsDecode(parcelle.nom);
+            document.getElementById('update_nom').value = parcelle.nom;
             document.getElementById('update_ilot').value = parcelle.ilot;
             document.getElementById('update_surface').value = parcelle.surface;
-            document.getElementById('update_culture').value = htmlSpecialCharsDecode(parcelle.culture);
+            document.getElementById('update_culture').value = parcelle.culture;
         }
 
         function hideUpdateForm() {

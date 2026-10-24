@@ -1,17 +1,12 @@
 <?php
-session_start();
-require_once "includes/db.php";
-
-if (!isset($_SESSION["user_id"])) {
-    header("Location: login.php");
-    exit();
-}
+require_once 'includes/securite.php';
+exiger_connexion();
 
 $db = getDB();
 
 function clean_input($data)
 {
-    return htmlspecialchars(stripslashes(trim($data)));
+    return trim($data);
 }
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
@@ -112,7 +107,8 @@ $interventions = $db->query('SELECT ie.*, p.nom as parcelle_nom, e.nom as engrai
                 <li><a href="rapport-engrais.php">Rapports</a></li>
             </ul>
         </nav>
-        <form id="logout" action="logout.php" method="get">
+        <form id="logout" action="logout.php" method="post">
+            <?= champ_csrf() ?>
             <button class="danger">Déconnexion</button>
         </form>
     </header>
@@ -127,6 +123,7 @@ $interventions = $db->query('SELECT ie.*, p.nom as parcelle_nom, e.nom as engrai
         <section class="card">
             <h3>Saisir une nouvelle intervention</h3>
             <form method="post">
+                <?= champ_csrf() ?>
                 <input type="hidden" name="action" value="create">
                 <div
                     style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; width: 100%;">
@@ -139,7 +136,7 @@ $interventions = $db->query('SELECT ie.*, p.nom as parcelle_nom, e.nom as engrai
 $parcelles->reset();
 while ($parcelle = $parcelles->fetchArray(SQLITE3_ASSOC)): ?>
                             <option value="<?php echo $parcelle["id"]; ?>">
-                                <?php echo htmlspecialchars_decode($parcelle["nom"]); ?> (<?php echo htmlspecialchars_decode($parcelle["surface"]); ?> ha)
+                                <?php echo echapper($parcelle["nom"]); ?> (<?php echo echapper($parcelle["surface"]); ?> ha)
                             </option>
                             <?php
 endwhile; ?>
@@ -155,7 +152,7 @@ endwhile; ?>
 $engrais->reset();
 while ($eng = $engrais->fetchArray(SQLITE3_ASSOC)): ?>
                             <option value="<?php echo $eng["id"]; ?>">
-                                <?php echo htmlspecialchars_decode($eng["nom"]); ?> (<?php echo htmlspecialchars_decode($eng["unite"]); ?>)
+                                <?php echo echapper($eng["nom"]); ?> (<?php echo echapper($eng["unite"]); ?>)
                             </option>
                             <?php
 endwhile; ?>
@@ -218,26 +215,27 @@ $interventions->reset();
 while ($intervention = $interventions->fetchArray(SQLITE3_ASSOC)): ?>
                         <tr>
                             <td><span style="font-weight: 600; color: var(--primary-color);">
-                                    <?php echo htmlspecialchars($intervention["annee_culturale"]); ?>
+                                    <?php echo echapper($intervention["annee_culturale"]); ?>
                                 </span></td>
                             <td>
-                                <?php echo htmlspecialchars_decode($intervention["parcelle_nom"]); ?>
+                                <?php echo echapper($intervention["parcelle_nom"]); ?>
                             </td>
                             <td>
                                 <?php echo date('d/m/Y', strtotime($intervention["date"])); ?>
                             </td>
                             <td>
-                                <?php echo htmlspecialchars_decode($intervention["engrais_nom"]); ?>
+                                <?php echo echapper($intervention["engrais_nom"]); ?>
                             </td>
                             <td>
-                                <?php echo htmlspecialchars($intervention["quantite"]); ?>
-                                <?php echo htmlspecialchars($intervention["engrais_unite"]); ?>
+                                <?php echo echapper($intervention["quantite"]); ?>
+                                <?php echo echapper($intervention["engrais_unite"]); ?>
                             </td>
                             <td style="text-align: right;">
                                 <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
                                     <button class="secondary"
-                                        onclick='showUpdateForm(<?php echo json_encode($intervention); ?>)'>Modifier</button>
+                                        onclick="showUpdateForm(<?php echo echapper(json_encode($intervention)); ?>)">Modifier</button>
                                     <form method="post" style="display:inline;">
+                                        <?= champ_csrf() ?>
                                         <input type="hidden" name="action" value="delete">
                                         <input type="hidden" name="id" value="<?php echo $intervention["id"]; ?>">
                                         <button type="submit" class="danger"
@@ -259,6 +257,7 @@ endwhile; ?>
             <div class="card" style="width: 100%; max-width: 700px; margin: 2rem;">
                 <h3>Modifier l'intervention</h3>
                 <form method="post">
+                    <?= champ_csrf() ?>
                     <input type="hidden" name="action" value="update">
                     <input type="hidden" name="id" id="update_id">
 
@@ -271,7 +270,7 @@ endwhile; ?>
 $parcelles->reset();
 while ($parcelle = $parcelles->fetchArray(SQLITE3_ASSOC)): ?>
                                 <option value="<?php echo $parcelle["id"]; ?>">
-                                    <?php echo htmlspecialchars_decode($parcelle["nom"]); ?> (<?php echo htmlspecialchars_decode($parcelle["surface"]); ?> ha)
+                                    <?php echo echapper($parcelle["nom"]); ?> (<?php echo echapper($parcelle["surface"]); ?> ha)
                                 </option>
                                 <?php
 endwhile; ?>
@@ -284,7 +283,7 @@ endwhile; ?>
 $engrais->reset();
 while ($eng = $engrais->fetchArray(SQLITE3_ASSOC)): ?>
                                 <option value="<?php echo $eng["id"]; ?>">
-                                    <?php echo htmlspecialchars_decode($eng["nom"]); ?> (<?php echo htmlspecialchars_decode($eng["unite"]); ?>)
+                                    <?php echo echapper($eng["nom"]); ?> (<?php echo echapper($eng["unite"]); ?>)
                                 </option>
                                 <?php
 endwhile; ?>
